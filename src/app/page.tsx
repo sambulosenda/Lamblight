@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { ContinueReading } from "@/components/ContinueReading";
+import { withDivineName } from "@/components/DivineName";
 import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
 import { cacheLife } from "next/cache";
 import { getChapter } from "@/lib/bible";
 import { BOOKS, bookByCode, chapterName } from "@/lib/books";
 import { chapterPath, versePath } from "@/lib/site";
 import { DEFAULT_VERSION } from "@/lib/versions";
+import { HOME_TOPICS, topicBySlug } from "@/lib/topics";
 import { votdForDate } from "@/lib/votd";
 
 const POPULAR = ["GEN", "PSA", "PRO", "ISA", "MAT", "JHN", "ROM", "PHP", "JAS"];
@@ -24,7 +27,7 @@ async function VerseOfTheDay() {
       <p id="votd" className="eyebrow">
         Verse of the day · {date}
       </p>
-      <blockquote>“{text}”</blockquote>
+      <blockquote>“{withDivineName(text)}”</blockquote>
       <p className="attribution">
         <Link href={versePath(DEFAULT_VERSION, book.slug, chapter, verse)}>{ref}</Link> · Berean Standard Bible
       </p>
@@ -43,6 +46,22 @@ export default function Home() {
   return (
     <main id="content" className="home">
       <VerseOfTheDay />
+      <div className="home-cards">
+        <ContinueReading fallback={{ href: chapterPath(DEFAULT_VERSION, "john", 1), label: "John 1" }} />
+        <section aria-labelledby="topics" className="card">
+          <h2 id="topics">Popular topics</h2>
+          <ul className="link-list">
+            {HOME_TOPICS.map((slug) => topicBySlug(slug)!).map((t) => (
+              <li key={t.slug}>
+                <Link href={`/topics/${t.slug}`}>Verses about {t.name.toLowerCase()}</Link>
+              </li>
+            ))}
+          </ul>
+          <Link href="/topics" className="more">
+            All topics
+          </Link>
+        </section>
+      </div>
       <section aria-labelledby="books" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div className="row-between">
           <h2 id="books" className="h2-serif">
@@ -50,7 +69,7 @@ export default function Home() {
           </h2>
           <Link href={`/${DEFAULT_VERSION}`}>All 66 books</Link>
         </div>
-        <ul className="pill-list">
+        <ul className="book-links">
           {BOOKS.filter((b) => POPULAR.includes(b.code)).map((b) => (
             <li key={b.code}>
               <Link href={`/${DEFAULT_VERSION}/${b.slug}`}>{b.name}</Link>

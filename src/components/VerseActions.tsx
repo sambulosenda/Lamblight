@@ -13,7 +13,7 @@ export function CopyVerseButton({ text, reference, versionAbbr }: Props) {
   return (
     <button
       type="button"
-      className="btn"
+      className="btn btn--quiet"
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(`“${text}”\n${reference} ${versionAbbr}`);
@@ -33,7 +33,7 @@ export function ShareVerseButton({ text, reference, versionAbbr, path }: Props &
   return (
     <button
       type="button"
-      className="btn"
+      className="btn btn--quiet"
       onClick={async () => {
         const url = `${location.origin}${path}`;
         try {

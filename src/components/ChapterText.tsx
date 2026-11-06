@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { withDivineName } from "./DivineName";
 import { HEADING_BLOCKS, verseId, type Block, type Chapter, type Inline } from "@/lib/scripture";
 
 /** Footnote call labels: a, b, ... z, aa, ab ... */
@@ -13,7 +14,7 @@ export function noteLabel(i: number): string {
 }
 
 function renderInline(item: Inline, key: string): ReactNode {
-  if (typeof item === "string") return item;
+  if (typeof item === "string") return <Fragment key={key}>{withDivineName(item, key)}</Fragment>;
   if ("nd" in item) {
     return (
       <span key={key} className="nd">
@@ -100,7 +101,7 @@ export function Footnotes({ chapter }: { chapter: Chapter }) {
   if (chapter.notes.length === 0) return null;
   return (
     <section className="footnotes" aria-labelledby="footnotes-title">
-      <h2 id="footnotes-title" className="eyebrow">
+      <h2 id="footnotes-title" className="section-title">
         Footnotes
       </h2>
       <ol type="a">

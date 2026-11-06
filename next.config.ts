@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     "/[version]/[book]/[chapter]/[verse]": ["./data/**/*.json"],
     "/[version]/[book]/[chapter]": ["./data/**/*.json"],
     "/search": ["./data/**/*.json"],
+    "/topics/[slug]": ["./data/**/*.json"],
     "/sitemap/[__metadata_id__]": ["./data/**/*.json"],
     "/img/[version]/[book]/[chapter]/[verse]": ["./data/**/*.json", "./assets/fonts/*.ttf"],
   },

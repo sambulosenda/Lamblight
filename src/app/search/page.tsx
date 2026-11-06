@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { withDivineName } from "@/components/DivineName";
+import { SearchIcon } from "@/components/Icons";
 import { chapterName } from "@/lib/books";
 import { Suspense } from "react";
 import { normalise, searchVerses } from "@/lib/search";
@@ -11,18 +13,46 @@ export const metadata: Metadata = { title: "Search", robots: { index: false, fol
 /** Wrap each query word in <mark>, ignoring case and punctuation differences. */
 function highlight(text: string, query: string) {
   const words = normalise(query).trim().split(" ").filter((w) => w.length > 1);
-  if (!words.length) return text;
+  if (!words.length) return withDivineName(text);
   const re = new RegExp(`\\b(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
-  return text.split(re).map((part, i) => (i % 2 ? <mark key={i}>{part}</mark> : part));
+  return text.split(re).map((part, i) => (i % 2 ? <mark key={i}>{part}</mark> : <span key={i}>{withDivineName(part, `h${i}`)}</span>));
+}
+
+function SearchForm({ q = "" }: { q?: string }) {
+  return (
+    <form className="search search-page-form" action="/go" method="get" role="search">
+      <SearchIcon />
+      <label htmlFor="search-q" className="sr-only">
+        Search the Bible
+      </label>
+      <input
+        id="search-q"
+        name="q"
+        type="search"
+        defaultValue={q}
+        placeholder="A reference like “jn 3 16”, or words"
+        autoComplete="off"
+        enterKeyHint="search"
+        autoFocus={!q}
+      />
+    </form>
+  );
 }
 
 async function Results({ searchParams }: { searchParams: PageProps<"/search">["searchParams"] }) {
   const raw = (await searchParams).q;
   const q = (Array.isArray(raw) ? raw[0] : raw ?? "").trim();
-  if (!q) return <p>Type a reference like “John 3:16” or words like “do not be anxious”.</p>;
+  if (!q)
+    return (
+      <>
+        <SearchForm />
+        <p>Type a reference like “John 3:16” or words like “do not be anxious”.</p>
+      </>
+    );
   const { total, hits } = await searchVerses(DEFAULT_VERSION, q);
   return (
     <>
+      <SearchForm q={q} />
       <h1 className="index-title" style={{ fontSize: 28 }}>
         {total ? `${total.toLocaleString("en-GB")} ${total === 1 ? "verse" : "verses"}` : "No verses found"} for “{q}”
       </h1>
@@ -47,7 +77,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
 export default function SearchPage({ searchParams }: PageProps<"/search">) {
   return (
     <main id="content" className="page" style={{ gap: 16 }}>
-      <Suspense fallback={<p>Searching…</p>}>
+      <Suspense fallback={<SearchForm />}>
         <Results searchParams={searchParams} />
       </Suspense>
     </main>

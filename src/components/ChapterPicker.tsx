@@ -51,7 +51,7 @@ export function ChapterPicker({ version, bookCode, chapter, label }: { version: 
           ) : (
             (["OT", "NT"] as const).map((t) => (
               <div key={t} className="testament">
-                <h3 className="eyebrow">{t === "OT" ? "Old Testament" : "New Testament"}</h3>
+                <h3 className="section-title">{t === "OT" ? "Old Testament" : "New Testament"}</h3>
                 <ul className="book-list">
                   {BOOKS.filter((b) => b.testament === t).map((b) => (
                     <li key={b.code}>

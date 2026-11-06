@@ -116,3 +116,31 @@ export function chapterName(book: Book): string {
 export function bookIndex(code: string): number {
   return BOOKS.findIndex((book) => book.code === code);
 }
+
+export interface BookGroup {
+  name: string;
+  testament: Testament;
+  books: Book[];
+}
+
+/** Traditional groupings, in canonical order. Each entry is [name, number of books]. */
+const GROUP_SIZES: [string, Testament, number][] = [
+  ["Law", "OT", 5],
+  ["History", "OT", 12],
+  ["Poetry and Wisdom", "OT", 5],
+  ["Major Prophets", "OT", 5],
+  ["Minor Prophets", "OT", 12],
+  ["Gospels and Acts", "NT", 5],
+  ["Paul’s Letters", "NT", 13],
+  ["General Letters", "NT", 8],
+  ["Prophecy", "NT", 1],
+];
+
+export const BOOK_GROUPS: BookGroup[] = (() => {
+  let i = 0;
+  return GROUP_SIZES.map(([name, testament, size]) => {
+    const books = BOOKS.slice(i, i + size);
+    i += size;
+    return { name, testament, books };
+  });
+})();
