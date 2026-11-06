@@ -1,0 +1,9 @@
+{
+  "id": "kjv",
+  "abbreviation": "KJV",
+  "name": "King James Version",
+  "language": "en",
+  "copyright": "King James Version. Public domain outside the United Kingdom; in the UK, rights are vested in the Crown.",
+  "source": "eBible.org text via github.com/seven1m/open-bibles (converted with scripts/xml-to-usfm.ts)",
+  "importedAt": "2026-11-06"
+}

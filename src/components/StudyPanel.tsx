@@ -21,6 +21,8 @@ interface Props {
   noteKey: string;
   lang: "grc" | "hbo";
   data: StudyData;
+  /** The same verse in the other versions on the site. */
+  versions: { abbreviation: string; name: string; href: string; text: string }[];
 }
 
 /** The first verb, else noun, else any linked word: a better starting word than “For”. */
@@ -40,7 +42,7 @@ function readNote(key: string): string {
   }
 }
 
-export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey, lang, data }: Props) {
+export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey, lang, data, versions }: Props) {
   const [word, setWord] = useState(() => defaultWord(data));
   const [tab, setTab] = useState<Tab>("words");
   const base = useId();
@@ -191,9 +193,22 @@ export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey
           ) : null}
 
           {tab === "versions" ? (
-            <p className="study-empty">
-              Study mode follows the Berean Standard Bible, the only translation on Lamplight today. Other versions will appear here as they are added.
-            </p>
+            versions.length ? (
+              <ul className="version-list">
+                {versions.map((v) => (
+                  <li key={v.abbreviation}>
+                    <Link href={v.href}>
+                      <span className="abbr" title={v.name}>
+                        {v.abbreviation}
+                      </span>
+                      <span className="text">{withDivineName(v.text, v.abbreviation)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="study-empty">This verse isn’t in the other versions on Lamplight.</p>
+            )
           ) : null}
 
           {tab === "notes" ? (

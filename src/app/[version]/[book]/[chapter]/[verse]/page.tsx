@@ -9,7 +9,7 @@ import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
 import { SITE_URL, chapterPath, versePath } from "@/lib/site";
-import { AVAILABLE_VERSIONS } from "@/lib/versions";
+import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
 /**
  * Single-verse landing page, the main search-engine entry point. Fully static:
@@ -82,10 +82,13 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
       AVAILABLE_VERSIONS.filter((v) => v.id !== version.id).map(async (v) => {
         const ch = await getChapter(v.id, book.code, chapter.n);
         const t = ch?.verses.find(([num]) => num === n)?.[1];
-        return t ? { version: v, text: t } : null;
+        return t !== undefined ? { version: v, text: t } : null;
       }),
     )
   ).filter((x) => x !== null);
+  // Study follows the BSB's verse numbering; a few verses (like John 5:4) exist only in other versions.
+  const hasStudy =
+    version.id === DEFAULT_VERSION || Boolean((await getChapter(DEFAULT_VERSION, book.code, chapter.n))?.verses.some(([v]) => v === n));
 
   return (
     <main id="content" className="page">
@@ -139,9 +142,11 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           <Link href={`${chapterHref}#${book.code}.${chapter.n}.${n}`} className="btn btn--primary">
             Read {chapterName(book)} {chapter.n}
           </Link>
-          <Link href={`${path}/study`} className="btn">
-            Study the words
-          </Link>
+          {hasStudy ? (
+            <Link href={`${versePath(DEFAULT_VERSION, book.slug, chapter.n, n)}/study`} className="btn">
+              Study the words
+            </Link>
+          ) : null}
           <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} />
           <ShareVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} path={path} />
           <VerseImageMaker path={path} reference={ref} />

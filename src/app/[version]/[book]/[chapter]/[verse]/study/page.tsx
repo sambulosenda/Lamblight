@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { Noto_Serif, Noto_Serif_Hebrew } from "next/font/google";
 import { withDivineName } from "@/components/DivineName";
 import { StudyPanel } from "@/components/StudyPanel";
+import { getChapter } from "@/lib/bible";
 import { chapterName } from "@/lib/books";
 import { resolveChapter } from "@/lib/params";
 import { chapterPath, versePath } from "@/lib/site";
 import { getStudy } from "@/lib/study";
-import { DEFAULT_VERSION } from "@/lib/versions";
+import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
 const greek = Noto_Serif({ subsets: ["greek"], variable: "--font-greek", display: "swap" });
 const hebrew = Noto_Serif_Hebrew({ subsets: ["hebrew"], variable: "--font-hebrew", display: "swap" });
@@ -27,7 +28,15 @@ async function resolve(raw: { version: string; book: string; chapter: string; ve
   if (index < 0) notFound();
   const study = await getStudy(data.version.id, data.book.code, data.chapter.n, n);
   if (!study) notFound();
-  return { ...data, n, index, study };
+  const versions = (
+    await Promise.all(
+      AVAILABLE_VERSIONS.filter((v) => v.id !== data.version.id).map(async (v) => {
+        const text = (await getChapter(v.id, data.book.code, data.chapter.n))?.verses.find(([num]) => num === n)?.[1];
+        return text !== undefined ? { abbreviation: v.abbreviation, name: v.name, href: versePath(v.id, data.book.slug, data.chapter.n, n), text } : null;
+      }),
+    )
+  ).filter((x) => x !== null);
+  return { ...data, n, index, study, versions };
 }
 
 export async function generateMetadata({ params }: PageProps<"/[version]/[book]/[chapter]/[verse]/study">): Promise<Metadata> {
@@ -41,7 +50,7 @@ export async function generateMetadata({ params }: PageProps<"/[version]/[book]/
 }
 
 export default async function StudyPage({ params }: PageProps<"/[version]/[book]/[chapter]/[verse]/study">) {
-  const { version, book, chapter, n, index, study } = await resolve(await params);
+  const { version, book, chapter, n, index, study, versions } = await resolve(await params);
   const prev = chapter.verses[index - 1];
   const next = chapter.verses[index + 1];
   const ref = `${chapterName(book)} ${chapter.n}:${n}`;
@@ -57,7 +66,9 @@ export default async function StudyPage({ params }: PageProps<"/[version]/[book]
       <div className="study-grid">
         <article className="study-text">
           <p className="running-head">
-            <span>{book.title}</span>
+            <span>
+              {book.title} · {version.abbreviation}
+            </span>
             <span>
               {chapter.n} : {first}
               {last > first ? `–${last}` : ""}
@@ -79,6 +90,7 @@ export default async function StudyPage({ params }: PageProps<"/[version]/[book]
             noteKey={`${book.code}.${chapter.n}.${n}`}
             lang={lang}
             data={study}
+            versions={versions}
           />
           {next ? (
             <p className="study-context">

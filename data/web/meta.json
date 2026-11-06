@@ -1,0 +1,9 @@
+{
+  "id": "web",
+  "abbreviation": "WEB",
+  "name": "World English Bible",
+  "language": "en",
+  "copyright": "The World English Bible is in the public domain.",
+  "source": "eBible.org text via github.com/seven1m/open-bibles (converted with scripts/xml-to-usfm.ts)",
+  "importedAt": "2026-11-06"
+}

@@ -56,7 +56,7 @@ export interface VersionMeta {
 }
 
 /** Heading-type blocks hold no verse text. */
-export const HEADING_BLOCKS = new Set(["s1", "s2", "s3", "r", "d", "ms", "mr", "qa", "mt1", "mt2"]);
+export const HEADING_BLOCKS = new Set(["s1", "s2", "s3", "r", "d", "ms", "mr", "qa", "mt1", "mt2", "sp"]);
 
 /** Poetry blocks render as separate indented lines and must never reflow as prose. */
 export const POETRY_BLOCKS = new Set(["q1", "q2", "q3", "qr", "qc", "qm1", "qm2"]);
