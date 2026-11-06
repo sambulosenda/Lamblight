@@ -32,7 +32,7 @@ async function resolve(raw: { version: string; book: string; chapter: string; ve
     await Promise.all(
       AVAILABLE_VERSIONS.filter((v) => v.id !== data.version.id).map(async (v) => {
         const text = (await getChapter(v.id, data.book.code, data.chapter.n))?.verses.find(([num]) => num === n)?.[1];
-        return text ? { abbreviation: v.abbreviation, name: v.name, href: versePath(v.id, data.book.slug, data.chapter.n, n), text } : null;
+        return text !== undefined ? { abbreviation: v.abbreviation, name: v.name, href: versePath(v.id, data.book.slug, data.chapter.n, n), text } : null;
       }),
     )
   ).filter((x) => x !== null);
@@ -66,7 +66,9 @@ export default async function StudyPage({ params }: PageProps<"/[version]/[book]
       <div className="study-grid">
         <article className="study-text">
           <p className="running-head">
-            <span>{book.title}</span>
+            <span>
+              {book.title} · {version.abbreviation}
+            </span>
             <span>
               {chapter.n} : {first}
               {last > first ? `–${last}` : ""}

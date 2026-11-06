@@ -13,6 +13,8 @@ interface Props {
   versionAbbr: string;
   /** Chapter URL path, e.g. /bsb/john/3 */
   chapterHref: string;
+  /** Verses that have a Study page (Study follows the BSB's verse numbering). */
+  studyVerses: number[];
 }
 
 /** "16–18, 20" from [16, 17, 18, 20] */
@@ -35,7 +37,7 @@ export function compressRanges(nums: number[]): string {
  * Tap or click verses to select them, then copy or share with the reference and
  * version. Verses are focusable; Enter or Space toggles one, Escape clears.
  */
-export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, chapterHref }: Props) {
+export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, chapterHref, studyVerses }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<number[]>([]);
   const [toast, setToast] = useState<string | null>(null);
@@ -137,7 +139,7 @@ export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, 
             Share
           </button>
           {single ? <VerseImageMaker path={`${chapterHref}/${single}`} reference={reference} label="Image" className="" /> : null}
-          {single ? <Link href={`/${DEFAULT_VERSION}${chapterHref.slice(chapterHref.indexOf("/", 1))}/${single}/study`}>Study</Link> : null}
+          {single && studyVerses.includes(single) ? <Link href={`/${DEFAULT_VERSION}${chapterHref.slice(chapterHref.indexOf("/", 1))}/${single}/study`}>Study</Link> : null}
           {single ? <Link href={`${chapterHref}/${single}`}>Open</Link> : null}
           <button type="button" aria-label="Clear selection" onClick={() => setSelected([])}>
             ✕

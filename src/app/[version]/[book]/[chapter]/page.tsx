@@ -5,12 +5,12 @@ import { ChapterText, Footnotes, psalterBook } from "@/components/ChapterText";
 import { ReaderSettings } from "@/components/ReaderSettings";
 import { VerseSelect } from "@/components/VerseSelect";
 import { VersionPicker } from "@/components/VersionPicker";
-import { nextChapter, previousChapter } from "@/lib/bible";
+import { getChapter, nextChapter, previousChapter } from "@/lib/bible";
 import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
 import { chapterPath } from "@/lib/site";
-import { AVAILABLE_VERSIONS } from "@/lib/versions";
+import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
 /** Every chapter is prerendered; nothing here depends on the request. */
 export const ensureStatic = "navigation";
@@ -41,6 +41,8 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
   const prev = previousChapter(book, chapter.n);
   const next = nextChapter(book, chapter.n);
   const path = chapterPath(version.id, book.slug, chapter.n);
+  const studyVerses =
+    version.id === DEFAULT_VERSION ? chapter.verses.map(([v]) => v) : ((await getChapter(DEFAULT_VERSION, book.code, chapter.n))?.verses.map(([v]) => v) ?? []);
 
   return (
     <>
@@ -75,7 +77,7 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
             )}
           </span>
         </h1>
-        <VerseSelect verses={chapter.verses} bookName={chapterName(book)} chapter={chapter.n} versionAbbr={version.abbreviation} chapterHref={path}>
+        <VerseSelect verses={chapter.verses} bookName={chapterName(book)} chapter={chapter.n} versionAbbr={version.abbreviation} chapterHref={path} studyVerses={studyVerses}>
           <ChapterText chapter={chapter} bookCode={book.code} />
         </VerseSelect>
         <p className="copyright">
