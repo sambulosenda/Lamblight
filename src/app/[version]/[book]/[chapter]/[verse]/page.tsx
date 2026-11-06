@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
+import { VerseImageMaker } from "@/components/VerseImageMaker";
 import { getChapter, getVerseNumbers, nextChapter, previousChapter } from "@/lib/bible";
 import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
@@ -54,7 +55,14 @@ export async function generateMetadata({ params }: PageProps<"/[version]/[book]/
     title: { absolute: `${title} | Lamplight` },
     description,
     alternates: { canonical: path },
-    openGraph: { title: `${ref} (${version.abbreviation})`, description: text, url: path, type: "article" },
+    openGraph: {
+      title: `${ref} (${version.abbreviation})`,
+      description: text,
+      url: path,
+      type: "article",
+      images: [{ url: `/img${path}?shape=og`, width: 1200, height: 630, alt: `${ref}: ${clip(text, 100)}` }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -127,6 +135,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           </Link>
           <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} />
           <ShareVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} path={path} />
+          <VerseImageMaker path={path} reference={ref} />
         </div>
       </section>
 

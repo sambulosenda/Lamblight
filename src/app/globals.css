@@ -569,6 +569,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .setting h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .preview { margin: 0 0 20px; font-family: var(--font-scripture); font-size: var(--reader-size); line-height: 1.6; }
 
+.image-maker__preview { display: flex; justify-content: center; margin-bottom: 20px; background: var(--paper-2); border-radius: 12px; padding: 16px; }
+.image-maker__preview img { height: min(44vh, 360px); width: auto; border-radius: 6px; box-shadow: 0 14px 40px rgba(31, 27, 22, 0.22); }
+
 /* ---------- Verse page ---------- */
 .page {
   width: 100%;

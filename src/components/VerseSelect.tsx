@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { VerseImageMaker } from "./VerseImageMaker";
 
 interface Props {
   children: ReactNode;
@@ -132,6 +133,7 @@ export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, 
           <button type="button" onClick={share}>
             Share
           </button>
+          {single ? <VerseImageMaker path={`${chapterHref}/${single}`} reference={reference} label="Image" className="" /> : null}
           {single ? <Link href={`${chapterHref}/${single}`}>Open</Link> : null}
           <button type="button" aria-label="Clear selection" onClick={() => setSelected([])}>
             ✕
