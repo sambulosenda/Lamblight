@@ -1,0 +1,5 @@
+# Keep generated Bible data and font files out of automated review.
+reviews:
+  path_filters:
+    - "!data/**"
+    - "!assets/fonts/**"

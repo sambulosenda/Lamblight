@@ -1,69 +1,63 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
+import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
+import { cacheLife } from "next/cache";
+import { getChapter } from "@/lib/bible";
+import { BOOKS, bookByCode, chapterName } from "@/lib/books";
+import { chapterPath, versePath } from "@/lib/site";
+import { DEFAULT_VERSION } from "@/lib/versions";
+import { votdForDate } from "@/lib/votd";
+
+const POPULAR = ["GEN", "PSA", "PRO", "ISA", "MAT", "JHN", "ROM", "PHP", "JAS"];
+
+async function VerseOfTheDay() {
+  "use cache";
+  cacheLife("hours");
+  const now = new Date();
+  const { code, chapter, verse } = votdForDate(now);
+  const book = bookByCode(code)!;
+  const ch = await getChapter(DEFAULT_VERSION, code, chapter);
+  const text = ch?.verses.find(([n]) => n === verse)?.[1] ?? "";
+  const ref = `${chapterName(book)} ${chapter}:${verse}`;
+  const date = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+  return (
+    <section aria-labelledby="votd" className="votd">
+      <p id="votd" className="eyebrow">
+        Verse of the day · {date}
+      </p>
+      <blockquote>“{text}”</blockquote>
+      <p className="attribution">
+        <Link href={versePath(DEFAULT_VERSION, book.slug, chapter, verse)}>{ref}</Link> · Berean Standard Bible
+      </p>
+      <div className="actions" style={{ justifyContent: "center" }}>
+        <Link href={chapterPath(DEFAULT_VERSION, book.slug, chapter)} className="btn btn--primary">
+          Read {chapterName(book)} {chapter}
+        </Link>
+        <CopyVerseButton text={text} reference={ref} versionAbbr="BSB" />
+        <ShareVerseButton text={text} reference={ref} versionAbbr="BSB" path={versePath(DEFAULT_VERSION, book.slug, chapter, verse)} />
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main id="content" className="home">
+      <VerseOfTheDay />
+      <section aria-labelledby="books" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div className="row-between">
+          <h2 id="books" className="h2-serif">
+            Open a book
+          </h2>
+          <Link href={`/${DEFAULT_VERSION}`}>All 66 books</Link>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <ul className="pill-list">
+          {BOOKS.filter((b) => POPULAR.includes(b.code)).map((b) => (
+            <li key={b.code}>
+              <Link href={`/${DEFAULT_VERSION}/${b.slug}`}>{b.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
   );
 }
