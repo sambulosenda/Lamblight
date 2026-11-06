@@ -80,5 +80,7 @@ export function parseTopicVerse(id: string): TopicVerseRef {
   const m = id.match(/^([1-3A-Z]{3})\.(\d+)\.(\d+)(?:-(\d+))?$/);
   if (!m) throw new Error(`Bad topic verse id ${id}`);
   const start = Number(m[3]);
-  return { code: m[1], chapter: Number(m[2]), start, end: m[4] ? Number(m[4]) : start };
+  const end = m[4] ? Number(m[4]) : start;
+  if (end < start) throw new Error(`Bad topic verse id ${id}: range ends before it starts`);
+  return { code: m[1], chapter: Number(m[2]), start, end };
 }

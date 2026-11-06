@@ -751,6 +751,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   text-decoration: none;
 }
 .continue:hover { color: var(--ink); }
+.continue--pending { min-height: 218px; }
 .continue__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
 .continue__head .smallcaps { font-size: 17px; }
 .continue__body { display: flex; gap: 14px; align-items: flex-start; }

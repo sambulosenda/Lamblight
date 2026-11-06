@@ -38,8 +38,14 @@ function parse(raw: string | null): LastRead | null {
  * set like the top of a printed page: running head, then the chapter numeral.
  * First-time visitors get a starting point instead.
  */
+const noop = () => () => {};
+
 export function ContinueReading({ fallback }: { fallback: LastRead }) {
   const raw = useSyncExternalStore(subscribe, read, () => null);
+  // The saved chapter only exists in the browser. Until it can be read, show an
+  // empty card of the same size rather than flashing the first-visit text.
+  const hydrated = useSyncExternalStore(noop, () => true, () => false);
+  if (!hydrated) return <div className="continue continue--pending" aria-hidden="true" />;
   const last = parse(raw);
   const target = last ?? fallback;
   const m = target.label.match(/^(.*?)\s+(\d+)$/);

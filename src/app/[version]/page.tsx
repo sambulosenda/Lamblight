@@ -38,6 +38,9 @@ export default async function VersionPage({ params }: PageProps<"/[version]">) {
         </div>
         <BookFilter targetId="all-books" />
       </div>
+      <p id="all-books-empty" className="index-sub" role="status" hidden>
+        No book matches that name. Try the first few letters, like “gen” or “1 cor”.
+      </p>
       <div id="all-books" style={{ display: "flex", flexDirection: "column", gap: 48 }}>
         {(["OT", "NT"] as const).map((t) => (
           <section key={t} className="testament" aria-labelledby={`t-${t}`}>
