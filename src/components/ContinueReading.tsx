@@ -34,21 +34,34 @@ function parse(raw: string | null): LastRead | null {
 }
 
 /**
- * "Pick up where you left off", from the chapter the reader last opened on this
- * device. First-time visitors get a gentle starting point instead.
+ * "Continue reading", from the chapter the reader last opened on this device,
+ * set like the top of a printed page: running head, then the chapter numeral.
+ * First-time visitors get a starting point instead.
  */
 export function ContinueReading({ fallback }: { fallback: LastRead }) {
   const raw = useSyncExternalStore(subscribe, read, () => null);
   const last = parse(raw);
   const target = last ?? fallback;
+  const m = target.label.match(/^(.*?)\s+(\d+)$/);
+  const book = m ? m[1] : target.label;
+  const chapter = m ? m[2] : "";
   return (
-    <section aria-labelledby="cont" className="card">
-      <h2 id="cont">{last ? "Pick up where you left off" : "Not sure where to start?"}</h2>
-      <p className="big">{target.label}</p>
-      <p className="muted">{last ? "The last chapter you opened on this device." : "John’s Gospel is a good first read: short chapters, the life of Jesus."}</p>
-      <Link href={target.href} className="more">
-        {last ? "Continue reading" : `Start ${target.label}`} →
-      </Link>
-    </section>
+    <Link href={target.href} className="continue">
+      <span className="continue__head">
+        <span className="smallcaps">{book}</span>
+        <span>{last ? "You stopped here" : "A good place to start"}</span>
+      </span>
+      <span className="continue__body">
+        {chapter ? (
+          <span className="continue__num" aria-hidden="true">
+            {chapter}
+          </span>
+        ) : null}
+        <span className="continue__text">
+          {last ? `Pick up ${target.label} where you left off.` : `${target.label}: short chapters on the life of Jesus.`}
+        </span>
+      </span>
+      <span className="continue__cta">{last ? "Continue reading" : `Start ${target.label}`} →</span>
+    </Link>
   );
 }

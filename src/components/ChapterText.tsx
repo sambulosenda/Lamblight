@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { withDivineName } from "./DivineName";
-import { HEADING_BLOCKS, verseId, type Block, type Chapter, type Inline } from "@/lib/scripture";
+import { HEADING_BLOCKS, POETRY_BLOCKS, verseId, type Block, type Chapter, type Inline } from "@/lib/scripture";
 
 /** Footnote call labels: a, b, ... z, aa, ab ... */
 export function noteLabel(i: number): string {
@@ -39,8 +39,26 @@ function renderInline(item: Inline, key: string): ReactNode {
  * or poetry lines. The first run of each verse gets the canonical ID (JHN.3.16) for
  * deep links.
  */
-function renderBlock(block: Block, bookCode: string, chapter: number, state: { verse: number; seen: Set<number> }, key: number) {
+function renderBlock(
+  block: Block,
+  bookCode: string,
+  chapter: number,
+  state: { verse: number; seen: Set<number> },
+  key: number,
+  numeral = false,
+) {
   if (block.t === "b") return <div key={key} className="b" aria-hidden="true" />;
+  // Poetry lines can't wrap around a dropped numeral, so it stands on its own line.
+  if (numeral && POETRY_BLOCKS.has(block.t)) {
+    return (
+      <Fragment key={key}>
+        <div className="chapter-num chapter-num--block" aria-hidden="true">
+          {chapter}
+        </div>
+        {renderBlock(block, bookCode, chapter, state, key)}
+      </Fragment>
+    );
+  }
 
   const runs: { verse: number; items: Inline[] }[] = [];
   for (const item of block.c) {
@@ -85,16 +103,28 @@ function renderBlock(block: Block, bookCode: string, chapter: number, state: { v
       );
     default:
       return (
-        <p key={key} className={block.t}>
+        <p key={key} className={numeral ? `${block.t} has-numeral` : block.t}>
+          {numeral ? (
+            <span className="chapter-num" aria-hidden="true">
+              {chapter}
+            </span>
+          ) : null}
           {children}
         </p>
       );
   }
 }
 
+/**
+ * The chapter text. Like a printed Bible, the chapter number is set as a large
+ * rubric numeral at the start of the first paragraph of Scripture.
+ */
 export function ChapterText({ chapter, bookCode }: { chapter: Chapter; bookCode: string }) {
   const state = { verse: 0, seen: new Set<number>() };
-  return <>{chapter.blocks.map((block, i) => renderBlock(block, bookCode, chapter.n, state, i))}</>;
+  const numeralAt = chapter.blocks.findIndex(
+    (bl) => bl.t !== "b" && !HEADING_BLOCKS.has(bl.t) && bl.c.some((it) => typeof it === "object" && "v" in it),
+  );
+  return <>{chapter.blocks.map((block, i) => renderBlock(block, bookCode, chapter.n, state, i, i === numeralAt))}</>;
 }
 
 export function Footnotes({ chapter }: { chapter: Chapter }) {

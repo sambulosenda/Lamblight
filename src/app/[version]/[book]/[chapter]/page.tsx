@@ -58,9 +58,12 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
         <ReaderSettings />
       </div>
       <main id="content" className="reader">
-        <p className="reader__book">{book.title}</p>
-        <h1 className="reader__title">
-          {chapterName(book)} {chapter.n}
+        <h1 className="running-head">
+          <span>{book.title}</span>
+          <span>
+            <span className="sr-only">, </span>
+            {book.code === "PSA" ? "Psalm" : "Chapter"} {chapter.n}
+          </span>
         </h1>
         <VerseSelect verses={chapter.verses} bookName={chapterName(book)} chapter={chapter.n} versionAbbr={version.abbreviation} chapterHref={path}>
           <ChapterText chapter={chapter} bookCode={book.code} />
@@ -69,17 +72,26 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
           {meta.name} ({meta.abbreviation}). {meta.copyright}
         </p>
         <Footnotes chapter={chapter} />
+        <div className="fleuron" aria-hidden="true">
+          · · ·
+        </div>
         <nav aria-label="Chapters" className="pager">
           {prev ? (
             <Link href={chapterPath(version.id, prev.book.slug, prev.chapter)} rel="prev">
-              ← {chapterName(prev.book)} {prev.chapter}
+              <span className="pager__label">Previous</span>
+              <span className="pager__ref">
+                {chapterName(prev.book)} {prev.chapter}
+              </span>
             </Link>
           ) : (
             <span />
           )}
           {next ? (
-            <Link href={chapterPath(version.id, next.book.slug, next.chapter)} rel="next">
-              {chapterName(next.book)} {next.chapter} →
+            <Link href={chapterPath(version.id, next.book.slug, next.chapter)} rel="next" className="pager__next">
+              <span className="pager__label">Next</span>
+              <span className="pager__ref">
+                {chapterName(next.book)} {next.chapter}
+              </span>
             </Link>
           ) : (
             <span />

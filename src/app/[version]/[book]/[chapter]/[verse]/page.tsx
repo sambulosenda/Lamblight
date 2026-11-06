@@ -107,6 +107,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           },
         ]}
       />
+      <div className="running-head running-head--page">
       <nav aria-label="Breadcrumb" className="breadcrumb">
         <ol>
           <li>
@@ -123,9 +124,13 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           <li aria-current="page">Verse {n}</li>
         </ol>
       </nav>
+        <span>{meta.name}</span>
+      </div>
 
       <section className="verse-hero" aria-labelledby="verse-ref">
-        <h1 id="verse-ref">{ref}</h1>
+        <h1 id="verse-ref">
+          <span>{chapterName(book)}</span> <span className="rubric">{chapter.n}:{n}</span>
+        </h1>
         <blockquote cite={`${SITE_URL}${path}`}>{withDivineName(text)}</blockquote>
         <p className="attribution">
           {meta.name} ({meta.abbreviation}). Public domain.
@@ -201,22 +206,34 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
       <nav aria-label="Verses" className="pager">
         {prev ? (
           <Link href={versePath(version.id, book.slug, chapter.n, prev[0])} rel="prev">
-            ← {chapterName(book)} {chapter.n}:{prev[0]}
+            <span className="pager__label">Previous verse</span>
+            <span className="pager__ref">
+              {chapterName(book)} {chapter.n}:{prev[0]}
+            </span>
           </Link>
         ) : prevCh ? (
           <Link href={chapterPath(version.id, prevCh.book.slug, prevCh.chapter)}>
-            ← {chapterName(prevCh.book)} {prevCh.chapter}
+            <span className="pager__label">Previous chapter</span>
+            <span className="pager__ref">
+              {chapterName(prevCh.book)} {prevCh.chapter}
+            </span>
           </Link>
         ) : (
           <span />
         )}
         {next ? (
-          <Link href={versePath(version.id, book.slug, chapter.n, next[0])} rel="next">
-            {chapterName(book)} {chapter.n}:{next[0]} →
+          <Link href={versePath(version.id, book.slug, chapter.n, next[0])} rel="next" className="pager__next">
+            <span className="pager__label">Next verse</span>
+            <span className="pager__ref">
+              {chapterName(book)} {chapter.n}:{next[0]}
+            </span>
           </Link>
         ) : nextCh ? (
-          <Link href={chapterPath(version.id, nextCh.book.slug, nextCh.chapter)}>
-            {chapterName(nextCh.book)} {nextCh.chapter} →
+          <Link href={chapterPath(version.id, nextCh.book.slug, nextCh.chapter)} className="pager__next">
+            <span className="pager__label">Next chapter</span>
+            <span className="pager__ref">
+              {chapterName(nextCh.book)} {nextCh.chapter}
+            </span>
           </Link>
         ) : (
           <span />

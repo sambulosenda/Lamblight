@@ -48,8 +48,10 @@ export default async function BookPage({ params }: PageProps<"/[version]/[book]"
         </ol>
       </nav>
       <div>
-        <p className="reader__book">{version.name}</p>
         <h1 className="index-title">{book.title}</h1>
+        <p className="index-sub">
+          {book.chapters} {book.chapters === 1 ? "chapter" : "chapters"} in the {version.name}
+        </p>
       </div>
       <ul className="chapter-grid" aria-label="Chapters">
         {Array.from({ length: book.chapters }, (_, i) => i + 1).map((n) => (

@@ -11,19 +11,20 @@ export function SiteHeader() {
           <LampIcon />
           <span>Lamplight</span>
         </Link>
+        <nav aria-label="Main" className="main-nav">
+          <Link href="/bsb">Books</Link>
+          <Link href="/topics">Topics</Link>
+          <Link href="/search" className="search-link" aria-label="Search">
+            <SearchIcon size={20} />
+          </Link>
+        </nav>
         <form className="search" action="/go" method="get" role="search">
-          <SearchIcon />
+          <SearchIcon size={17} />
           <label htmlFor="q" className="sr-only">
             Search the Bible
           </label>
-          <input id="q" name="q" type="search" placeholder="Search a verse, like “jn 3 16” or “do not be anxious”" autoComplete="off" enterKeyHint="search" />
+          <input id="q" name="q" type="search" placeholder="A verse, a word, “ps 23”" autoComplete="off" enterKeyHint="search" />
         </form>
-        <nav aria-label="Main" className="main-nav">
-          <Link href="/search" className="search-link" aria-label="Search">
-            <SearchIcon />
-          </Link>
-          <Link href="/bsb">Read</Link>
-        </nav>
       </div>
     </HeaderShell>
   );
