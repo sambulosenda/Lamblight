@@ -22,6 +22,7 @@ export default async function sitemap(props: { id: Promise<string> }): Promise<M
     return [
       { url: SITE_URL, changeFrequency: "daily", priority: 1 },
       { url: `${SITE_URL}/topics`, priority: 0.7 },
+      ...["about", "subscribe", "donate", "privacy"].map((p) => ({ url: `${SITE_URL}/${p}`, priority: 0.3 })),
       ...TOPICS.map((t) => ({ url: `${SITE_URL}/topics/${t.slug}`, priority: 0.7 })),
       ...AVAILABLE_VERSIONS.flatMap((v) => [
         { url: `${SITE_URL}/${v.id}`, priority: 0.8 },

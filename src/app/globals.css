@@ -992,3 +992,36 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .chapters { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .chapters a { height: 56px; }
 }
+
+/* ---------- Daily verse signup ---------- */
+.subscribe { display: flex; flex-direction: column; gap: 8px; max-width: 520px; }
+.subscribe--compact { padding-top: 20px; border-top: 1px solid var(--rule); }
+.subscribe__label { font-size: 15px; font-weight: 600; }
+.subscribe__row { display: flex; flex-wrap: wrap; gap: 8px; }
+.subscribe__row input {
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+.subscribe__row input:focus { outline: 2px solid var(--link); outline-offset: 2px; }
+.subscribe__note { margin: 0; font-size: 14px; color: var(--muted); }
+.subscribe__note--error { color: var(--rubric); }
+.subscribe__done { margin: 0; padding: 14px 16px; border-left: 3px solid var(--rubric); background: var(--paper-2); font-size: 15px; }
+.subscribe__trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+/* ---------- Plain pages (About, Donate, Privacy) ---------- */
+.prose-page { max-width: 720px; }
+.prose { font-family: var(--font-scripture); font-size: 18px; line-height: 1.7; color: var(--ink-soft); }
+.prose p { margin: 0 0 16px; }
+.prose h2 { margin: 32px 0 8px; font-size: 19px; font-weight: 500; font-variant-caps: all-small-caps; letter-spacing: 0.06em; color: var(--rubric); }
+.prose-small { margin: 0; font-size: 14px; color: var(--muted); }
+.site-footer__links { display: flex; flex-wrap: wrap; gap: 4px 20px; width: 100%; font-size: 14px; }
+.site-footer__links a { color: var(--ink-soft); text-decoration: none; padding: 6px 0; }
+.site-footer__links a:hover { color: var(--link); }

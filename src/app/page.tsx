@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ContinueReading } from "@/components/ContinueReading";
 import { withDivineName } from "@/components/DivineName";
+import { SubscribeForm } from "@/components/SubscribeForm";
 import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
 import { cacheLife } from "next/cache";
 import { getChapter } from "@/lib/bible";
@@ -39,6 +40,7 @@ async function VerseOfTheDay() {
         <CopyVerseButton text={text} reference={ref} versionAbbr="BSB" />
         <ShareVerseButton text={text} reference={ref} versionAbbr="BSB" path={versePath(DEFAULT_VERSION, book.slug, chapter, verse)} />
       </div>
+      <SubscribeForm compact />
     </section>
   );
 }
