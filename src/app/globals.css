@@ -602,6 +602,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .context .vn { font-size: 11px; vertical-align: super; }
 .context strong { font-weight: 600; color: var(--ink); }
 .context strong .vn { color: var(--link); }
+.version-list { list-style: none; margin: 0; padding: 0; }
+.version-list li + li { border-top: 1px solid var(--line-soft); }
+.version-list a {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+.version-list a:hover { color: var(--ink); background: var(--paper-2); }
+.version-list .abbr { font-size: 14px; font-weight: 600; color: var(--link); padding-top: 3px; }
+.version-list .text { font-family: var(--font-scripture); font-size: 17px; line-height: 1.6; }
 .note-list { margin: 0; padding-left: 1.25em; font-size: 15px; color: var(--ink-soft); }
 
 /* ---------- Index pages ---------- */

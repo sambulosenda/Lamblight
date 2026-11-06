@@ -51,7 +51,12 @@ function tokenize(src: string): (string | Token)[] {
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(src))) {
-    if (m.index > last) out.push(src.slice(last, m.index));
+    if (m.index > last) {
+      let text = src.slice(last, m.index);
+      // USFM 3 word attributes sit before a closing marker: \w grace|strong="G5485"\w*
+      if (m[3]) text = text.replace(/\|[^|\\]*$/, "");
+      if (text) out.push(text);
+    }
     out.push({ marker: m[2], plus: m[1] === "+", close: m[3] === "*" });
     last = re.lastIndex;
     // An opening marker swallows one following space.

@@ -48,6 +48,20 @@ const SOURCES: Record<string, SourceConfig> = {
     copyright: "King James Version. Public domain outside the United Kingdom; in the UK, rights are vested in the Crown.",
     url: "https://ebible.org/Scriptures/eng-kjv2006_usfm.zip",
   },
+  asv: {
+    abbreviation: "ASV",
+    name: "American Standard Version",
+    language: "en",
+    copyright: "The American Standard Version (1901) is in the public domain.",
+    url: "https://ebible.org/Scriptures/eng-asv_usfm.zip",
+  },
+  ylt: {
+    abbreviation: "YLT",
+    name: "Young’s Literal Translation",
+    language: "en",
+    copyright: "Young’s Literal Translation (1898) is in the public domain.",
+    url: "https://ebible.org/Scriptures/engylt_usfm.zip",
+  },
 };
 
 function walk(dir: string): string[] {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
-import { getVerseNumbers, nextChapter, previousChapter } from "@/lib/bible";
+import { getChapter, getVerseNumbers, nextChapter, previousChapter } from "@/lib/bible";
 import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
@@ -68,6 +68,15 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
   const prevCh = previousChapter(book, chapter.n);
   const nextCh = nextChapter(book, chapter.n);
   const notes = chapter.notes.filter((note) => note.v === n);
+  const others = (
+    await Promise.all(
+      AVAILABLE_VERSIONS.filter((v) => v.id !== version.id).map(async (v) => {
+        const ch = await getChapter(v.id, book.code, chapter.n);
+        const t = ch?.verses.find(([num]) => num === n)?.[1];
+        return t ? { version: v, text: t } : null;
+      }),
+    )
+  ).filter((x) => x !== null);
 
   return (
     <main id="content" className="page">
@@ -145,6 +154,24 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
               </>
             ) : null}
           </p>
+        </section>
+      ) : null}
+
+      {others.length ? (
+        <section className="section" aria-labelledby="ver">
+          <h2 id="ver" className="eyebrow">
+            {ref} in other versions
+          </h2>
+          <ul className="version-list">
+            {others.map((o) => (
+              <li key={o.version.id}>
+                <Link href={versePath(o.version.id, book.slug, chapter.n, n)}>
+                  <span className="abbr">{o.version.abbreviation}</span>
+                  <span className="text">{o.text}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 

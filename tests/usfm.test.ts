@@ -55,3 +55,13 @@ describe("parseUsfm", () => {
     expect(book.chapters[1].notes[0].text).toBe("LORD or God");
   });
 });
+
+describe("parseUsfm word attributes (WEB/KJV files from ebible.org)", () => {
+  it("drops |strong= attributes and keeps the words", () => {
+    const { book } = parseUsfm(String.raw`\id JHN
+\c 3
+\p
+\v 16 \w For|strong="G1063"\w* \w God|strong="G2316"\w* \w so|strong="G3779"\w* \add loved\add* \+w world|lemma="kosmos"\+w*.`);
+    expect(book.chapters[0].verses).toEqual([[16, "For God so loved world."]]);
+  });
+});

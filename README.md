@@ -49,8 +49,11 @@ script before first paint, so pages stay static with no flash.
 
 ## Adding a version
 
-1. Add it to `SOURCES` in `scripts/import-bible.ts` and run `npm run import -- web`.
-2. Set `available: true` for it in `src/lib/versions.ts`.
+1. Add it to `SOURCES` in `scripts/import-bible.ts` (WEB and KJV are already there).
+2. Import it: `npm run import -- web` locally, or run the **Import Bible text** workflow in
+   GitHub Actions, which downloads from ebible.org and opens a pull request with the data.
+3. Set `available: true` for it in `src/lib/versions.ts`. Verse pages then show it under
+   "In other versions" and it appears in the version switcher.
 
 Licensed versions (YouVersion Platform) will load in the browser only and never get
 server-rendered or indexed pages.
@@ -61,4 +64,5 @@ ebible.org was not reachable from the build environment used to start this proje
 committed BSB data was imported from the USFM in
 [usfm-bible/examples.bsb](https://github.com/usfm-bible/examples.bsb) (BSB text as of
 26 Aug 2024). That fork has at least one known error (Genesis 2:4 repeats "God made them.").
-Re-run `npm run import -- bsb` from a machine that can reach ebible.org before launch.
+Before launch, re-import from ebible.org: run the **Import Bible text** workflow with `bsb`,
+or `npm run import -- bsb` on a machine that can reach ebible.org.
