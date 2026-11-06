@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { withDivineName } from "@/components/DivineName";
 import { notFound } from "next/navigation";
 import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
 import { VerseImageMaker } from "@/components/VerseImageMaker";
@@ -106,6 +107,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           },
         ]}
       />
+      <div className="running-head running-head--page">
       <nav aria-label="Breadcrumb" className="breadcrumb">
         <ol>
           <li>
@@ -122,16 +124,23 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           <li aria-current="page">Verse {n}</li>
         </ol>
       </nav>
+        <span>{meta.name}</span>
+      </div>
 
       <section className="verse-hero" aria-labelledby="verse-ref">
-        <h1 id="verse-ref">{ref}</h1>
-        <blockquote cite={`${SITE_URL}${path}`}>{text}</blockquote>
+        <h1 id="verse-ref">
+          <span>{chapterName(book)}</span> <span className="rubric">{chapter.n}:{n}</span>
+        </h1>
+        <blockquote cite={`${SITE_URL}${path}`}>{withDivineName(text)}</blockquote>
         <p className="attribution">
           {meta.name} ({meta.abbreviation}). Public domain.
         </p>
         <div className="actions">
           <Link href={`${chapterHref}#${book.code}.${chapter.n}.${n}`} className="btn btn--primary">
             Read {chapterName(book)} {chapter.n}
+          </Link>
+          <Link href={`${path}/study`} className="btn">
+            Study the words
           </Link>
           <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} />
           <ShareVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} path={path} />
@@ -141,25 +150,25 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
 
       {prev || next ? (
         <section className="section" aria-labelledby="ctx">
-          <h2 id="ctx" className="eyebrow">
+          <h2 id="ctx" className="section-title">
             In context
           </h2>
           <p className="context">
             {prev ? (
               <>
                 <sup className="vn">{prev[0]}</sup>
-                {prev[1]}{" "}
+                {withDivineName(prev[1], "p")}{" "}
               </>
             ) : null}
             <strong>
               <sup className="vn">{n}</sup>
-              {text}
+              {withDivineName(text, "c")}
             </strong>
             {next ? (
               <>
                 {" "}
                 <sup className="vn">{next[0]}</sup>
-                {next[1]}
+                {withDivineName(next[1], "n")}
               </>
             ) : null}
           </p>
@@ -168,7 +177,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
 
       {others.length ? (
         <section className="section" aria-labelledby="ver">
-          <h2 id="ver" className="eyebrow">
+          <h2 id="ver" className="section-title">
             {ref} in other versions
           </h2>
           <ul className="version-list">
@@ -176,7 +185,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
               <li key={o.version.id}>
                 <Link href={versePath(o.version.id, book.slug, chapter.n, n)}>
                   <span className="abbr">{o.version.abbreviation}</span>
-                  <span className="text">{o.text}</span>
+                  <span className="text">{withDivineName(o.text)}</span>
                 </Link>
               </li>
             ))}
@@ -186,7 +195,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
 
       {notes.length ? (
         <section className="section" aria-labelledby="notes">
-          <h2 id="notes" className="eyebrow">
+          <h2 id="notes" className="section-title">
             Footnotes
           </h2>
           <ul className="note-list">
@@ -200,22 +209,34 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
       <nav aria-label="Verses" className="pager">
         {prev ? (
           <Link href={versePath(version.id, book.slug, chapter.n, prev[0])} rel="prev">
-            ← {chapterName(book)} {chapter.n}:{prev[0]}
+            <span className="pager__label">Previous verse</span>
+            <span className="pager__ref">
+              {chapterName(book)} {chapter.n}:{prev[0]}
+            </span>
           </Link>
         ) : prevCh ? (
           <Link href={chapterPath(version.id, prevCh.book.slug, prevCh.chapter)}>
-            ← {chapterName(prevCh.book)} {prevCh.chapter}
+            <span className="pager__label">Previous chapter</span>
+            <span className="pager__ref">
+              {chapterName(prevCh.book)} {prevCh.chapter}
+            </span>
           </Link>
         ) : (
           <span />
         )}
         {next ? (
-          <Link href={versePath(version.id, book.slug, chapter.n, next[0])} rel="next">
-            {chapterName(book)} {chapter.n}:{next[0]} →
+          <Link href={versePath(version.id, book.slug, chapter.n, next[0])} rel="next" className="pager__next">
+            <span className="pager__label">Next verse</span>
+            <span className="pager__ref">
+              {chapterName(book)} {chapter.n}:{next[0]}
+            </span>
           </Link>
         ) : nextCh ? (
-          <Link href={chapterPath(version.id, nextCh.book.slug, nextCh.chapter)}>
-            {chapterName(nextCh.book)} {nextCh.chapter} →
+          <Link href={chapterPath(version.id, nextCh.book.slug, nextCh.chapter)} className="pager__next">
+            <span className="pager__label">Next chapter</span>
+            <span className="pager__ref">
+              {chapterName(nextCh.book)} {nextCh.chapter}
+            </span>
           </Link>
         ) : (
           <span />
