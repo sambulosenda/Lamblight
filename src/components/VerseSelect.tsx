@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { DEFAULT_VERSION } from "@/lib/versions";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { VerseImageMaker } from "./VerseImageMaker";
 
@@ -136,7 +137,7 @@ export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, 
             Share
           </button>
           {single ? <VerseImageMaker path={`${chapterHref}/${single}`} reference={reference} label="Image" className="" /> : null}
-          {single ? <Link href={`${chapterHref}/${single}/study`}>Study</Link> : null}
+          {single ? <Link href={`/${DEFAULT_VERSION}${chapterHref.slice(chapterHref.indexOf("/", 1))}/${single}/study`}>Study</Link> : null}
           {single ? <Link href={`${chapterHref}/${single}`}>Open</Link> : null}
           <button type="button" aria-label="Clear selection" onClick={() => setSelected([])}>
             ✕

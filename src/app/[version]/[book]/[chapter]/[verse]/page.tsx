@@ -9,7 +9,7 @@ import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
 import { SITE_URL, chapterPath, versePath } from "@/lib/site";
-import { AVAILABLE_VERSIONS } from "@/lib/versions";
+import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
 /**
  * Single-verse landing page, the main search-engine entry point. Fully static:
@@ -139,7 +139,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           <Link href={`${chapterHref}#${book.code}.${chapter.n}.${n}`} className="btn btn--primary">
             Read {chapterName(book)} {chapter.n}
           </Link>
-          <Link href={`${path}/study`} className="btn">
+          <Link href={`${versePath(DEFAULT_VERSION, book.slug, chapter.n, n)}/study`} className="btn">
             Study the words
           </Link>
           <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} />

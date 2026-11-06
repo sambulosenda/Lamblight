@@ -19,8 +19,8 @@ export const DEFAULT_VERSION = "bsb";
 
 export const VERSIONS: VersionInfo[] = [
   { id: "bsb", abbreviation: "BSB", name: "Berean Standard Bible", source: "self-hosted", available: true },
-  { id: "web", abbreviation: "WEB", name: "World English Bible", source: "self-hosted", available: false },
-  { id: "kjv", abbreviation: "KJV", name: "King James Version", source: "self-hosted", available: false },
+  { id: "web", abbreviation: "WEB", name: "World English Bible", source: "self-hosted", available: true },
+  { id: "kjv", abbreviation: "KJV", name: "King James Version", source: "self-hosted", available: true },
   { id: "asv", abbreviation: "ASV", name: "American Standard Version", source: "self-hosted", available: false },
   { id: "ylt", abbreviation: "YLT", name: "Young’s Literal Translation", source: "self-hosted", available: false },
 ];
