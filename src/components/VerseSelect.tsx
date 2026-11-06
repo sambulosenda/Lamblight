@@ -58,6 +58,8 @@ export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, 
     });
     try {
       localStorage.setItem("lamplight:last", JSON.stringify({ href: chapterHref, label: `${bookName} ${chapter}` }));
+      const read: string[] = JSON.parse(localStorage.getItem("lamplight:read") ?? "[]");
+      if (Array.isArray(read) && !read.includes(chapterHref)) localStorage.setItem("lamplight:read", JSON.stringify([...read, chapterHref]));
     } catch {}
   }, [chapterHref, bookName, chapter]);
 
@@ -134,6 +136,7 @@ export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, 
             Share
           </button>
           {single ? <VerseImageMaker path={`${chapterHref}/${single}`} reference={reference} label="Image" className="" /> : null}
+          {single ? <Link href={`${chapterHref}/${single}/study`}>Study</Link> : null}
           {single ? <Link href={`${chapterHref}/${single}`}>Open</Link> : null}
           <button type="button" aria-label="Clear selection" onClick={() => setSelected([])}>
             ✕

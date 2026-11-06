@@ -139,6 +139,9 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
           <Link href={`${chapterHref}#${book.code}.${chapter.n}.${n}`} className="btn btn--primary">
             Read {chapterName(book)} {chapter.n}
           </Link>
+          <Link href={`${path}/study`} className="btn">
+            Study the words
+          </Link>
           <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} />
           <ShareVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} path={path} />
           <VerseImageMaker path={path} reference={ref} />

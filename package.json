@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "import:study": "tsx scripts/import-study.ts",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
     "import": "tsx scripts/import-bible.ts"

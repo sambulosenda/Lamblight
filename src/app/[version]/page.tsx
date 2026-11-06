@@ -33,8 +33,9 @@ export default async function VersionPage({ params }: PageProps<"/[version]">) {
     <main id="content" className="page">
       <div className="index-head">
         <div>
-          <h1 className="index-title">The Bible</h1>
-          <p className="index-sub">66 books in the {version.name}</p>
+          <p className="smallcaps-head index-label">Contents</p>
+          <h1 className="index-title index-title--contents">The Bible</h1>
+          <p className="index-sub">Sixty-six books, in the order of the {version.name}</p>
         </div>
         <BookFilter targetId="all-books" />
       </div>

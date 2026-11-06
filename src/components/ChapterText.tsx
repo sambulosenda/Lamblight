@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { withDivineName } from "./DivineName";
+import { LampIcon } from "./Logo";
 import { HEADING_BLOCKS, POETRY_BLOCKS, verseId, type Block, type Chapter, type Inline } from "@/lib/scripture";
 
 /** Footnote call labels: a, b, ... z, aa, ab ... */
@@ -124,7 +125,33 @@ export function ChapterText({ chapter, bookCode }: { chapter: Chapter; bookCode:
   const numeralAt = chapter.blocks.findIndex(
     (bl) => bl.t !== "b" && !HEADING_BLOCKS.has(bl.t) && bl.c.some((it) => typeof it === "object" && "v" in it),
   );
+  if (bookCode === "PSA") {
+    // A psalm opens with its own head (word, numeral, ornament) instead of a dropped numeral.
+    return (
+      <>
+        <div className="psalm-head" aria-hidden="true">
+          <span className="psalm-head__word">Psalm</span>
+          <span className="psalm-head__num">{chapter.n}</span>
+          <span className="psalm-head__orn">
+            <span />
+            <LampIcon size={18} />
+            <span />
+          </span>
+        </div>
+        {chapter.blocks.map((block, i) => renderBlock(block, bookCode, chapter.n, state, i))}
+      </>
+    );
+  }
   return <>{chapter.blocks.map((block, i) => renderBlock(block, bookCode, chapter.n, state, i, i === numeralAt))}</>;
+}
+
+/** The five books of the Psalter. */
+export function psalterBook(n: number): string {
+  if (n <= 41) return "Book One";
+  if (n <= 72) return "Book Two";
+  if (n <= 89) return "Book Three";
+  if (n <= 106) return "Book Four";
+  return "Book Five";
 }
 
 export function Footnotes({ chapter }: { chapter: Chapter }) {

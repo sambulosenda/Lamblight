@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HeaderShell } from "./HeaderShell";
 import { SearchIcon } from "./Icons";
 import { LampIcon } from "./Logo";
+import { NavLink } from "./NavLink";
 
 export function SiteHeader() {
   return (
@@ -12,8 +13,12 @@ export function SiteHeader() {
           <span>Lamplight</span>
         </Link>
         <nav aria-label="Main" className="main-nav">
-          <Link href="/bsb">Books</Link>
-          <Link href="/topics">Topics</Link>
+          <NavLink href="/bsb" match="/bsb">
+            Books
+          </NavLink>
+          <NavLink href="/topics" match="/topics">
+            Topics
+          </NavLink>
           <Link href="/search" className="search-link" aria-label="Search">
             <SearchIcon size={20} />
           </Link>

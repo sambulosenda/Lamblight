@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChapterPicker } from "@/components/ChapterPicker";
-import { ChapterText, Footnotes } from "@/components/ChapterText";
+import { ChapterText, Footnotes, psalterBook } from "@/components/ChapterText";
 import { ReaderSettings } from "@/components/ReaderSettings";
 import { VerseSelect } from "@/components/VerseSelect";
 import { VersionPicker } from "@/components/VersionPicker";
@@ -62,7 +62,17 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
           <span>{book.title}</span>
           <span>
             <span className="sr-only">, </span>
-            {book.code === "PSA" ? "Psalm" : "Chapter"} {chapter.n}
+            {book.code === "PSA" ? (
+              <>
+                Psalm {chapter.n}
+                <span className="running-head__extra">
+                  <span className="sr-only">, </span>
+                  {psalterBook(chapter.n)}
+                </span>
+              </>
+            ) : (
+              <>Chapter {chapter.n}</>
+            )}
           </span>
         </h1>
         <VerseSelect verses={chapter.verses} bookName={chapterName(book)} chapter={chapter.n} versionAbbr={version.abbreviation} chapterHref={path}>
