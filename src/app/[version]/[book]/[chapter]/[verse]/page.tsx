@@ -10,6 +10,7 @@ import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
 import { SITE_URL, chapterPath, versePath } from "@/lib/site";
+import { topicsForVerse } from "@/lib/topics";
 import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
 /**
@@ -78,6 +79,7 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
   const prevCh = previousChapter(book, chapter.n);
   const nextCh = nextChapter(book, chapter.n);
   const notes = chapter.notes.filter((note) => note.v === n);
+  const topics = topicsForVerse(`${book.code}.${chapter.n}.${n}`).slice(0, 8);
   const others = (
     await Promise.all(
       AVAILABLE_VERSIONS.filter((v) => v.id !== version.id).map(async (v) => {
@@ -208,6 +210,21 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
                   <span className="abbr">{o.version.abbreviation}</span>
                   <span className="text">{withDivineName(o.text)}</span>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {topics.length ? (
+        <section className="section" aria-labelledby="topics">
+          <h2 id="topics" className="section-title">
+            Topics with this verse
+          </h2>
+          <ul className="book-links">
+            {topics.map((t) => (
+              <li key={t.slug}>
+                <Link href={`/topics/${t.slug}`}>{t.name}</Link>
               </li>
             ))}
           </ul>

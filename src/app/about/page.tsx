@@ -27,8 +27,8 @@ export default function AboutPage() {
         <h2>The text</h2>
         <p>
           Lamplight uses translations in the public domain: the Berean Standard Bible, the World English Bible and the King
-          James Version. Greek and Hebrew word data comes from the Berean Bible’s open data (Apache 2.0), and cross references
-          from OpenBible.info (CC BY).
+          James Version. Greek and Hebrew word data comes from the Berean Bible’s open data (Apache 2.0). Cross references, and
+          many of the verse lists on <Link href="/topics">topic pages</Link>, come from OpenBible.info (CC BY).
         </p>
         <h2>Who makes it</h2>
         <p>[Your name, where you are, and why you built this.]</p>

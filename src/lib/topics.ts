@@ -1,72 +1,40 @@
+import imported from "../../data/topics.json";
+import { CURATED_SLUGS, CURATED_TOPICS } from "./topics-curated";
+
 /**
- * Curated topic pages ("Verses about anxiety"). Each verse is a canonical ID,
- * optionally with a range end in the same chapter: "PHP.4.6-7".
- * Keep each list short and well known; the order is the order shown.
+ * Topic pages ("Verses about anxiety"): the hand-written topics in topics-curated.ts,
+ * then the ones built by scripts/import-topics.ts from OpenBible.info (CC BY).
+ * Each verse is a canonical ID, optionally with a range end in the same chapter: "PHP.4.6-7".
  */
 export interface Topic {
   slug: string;
+  /** For headings and links: "God’s love", "Anxiety". */
   name: string;
+  /** Mid-sentence, after "Verses about": "God’s love", "anxiety". */
+  phrase: string;
   /** One line under the title. */
   intro: string;
   verses: string[];
+  /** Imported topics credit OpenBible.info. */
+  source: "curated" | "openbible";
 }
 
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export const TOPICS: Topic[] = [
-  {
-    slug: "anxiety",
-    name: "Anxiety",
-    intro: "For days when worry is loud.",
-    verses: ["PHP.4.6-7", "1PE.5.7", "MAT.6.34", "MAT.11.28-30", "PSA.94.19", "ISA.41.10", "JHN.14.27", "PSA.55.22", "PRO.12.25", "PSA.56.3"],
-  },
-  {
-    slug: "hope",
-    name: "Hope",
-    intro: "Promises to hold on to.",
-    verses: ["ROM.15.13", "JER.29.11", "ISA.40.31", "ROM.5.3-5", "LAM.3.22-23", "HEB.11.1", "PSA.42.11", "ROM.8.28", "HEB.6.19", "1PE.1.3"],
-  },
-  {
-    slug: "strength",
-    name: "Strength",
-    intro: "When you have nothing left.",
-    verses: ["PHP.4.13", "ISA.40.29", "2CO.12.9", "PSA.46.1", "NEH.8.10", "JOS.1.9", "PSA.28.7", "EPH.6.10", "PSA.73.26", "DEU.31.6"],
-  },
-  {
-    slug: "grief",
-    name: "Grief",
-    intro: "Comfort for loss and sorrow.",
-    verses: ["PSA.34.18", "MAT.5.4", "REV.21.4", "PSA.147.3", "JHN.11.25-26", "2CO.1.3-4", "1TH.4.13-14", "PSA.23.4", "ISA.53.4", "JHN.16.22"],
-  },
-  {
-    slug: "peace",
-    name: "Peace",
-    intro: "Quiet for a restless heart.",
-    verses: ["JHN.14.27", "ISA.26.3", "COL.3.15", "NUM.6.24-26", "JHN.16.33", "PSA.4.8", "ROM.5.1", "2TH.3.16", "MAT.5.9", "PSA.29.11"],
-  },
-  {
-    slug: "love",
-    name: "Love",
-    intro: "God’s love, and how we love others.",
-    verses: ["1CO.13.4-7", "JHN.3.16", "1JN.4.7-8", "ROM.8.38-39", "JHN.15.13", "1JN.4.19", "ROM.5.8", "1PE.4.8", "JHN.13.34-35", "ZEP.3.17"],
-  },
-  {
-    slug: "forgiveness",
-    name: "Forgiveness",
-    intro: "Being forgiven, and forgiving.",
-    verses: ["1JN.1.9", "EPH.4.32", "COL.3.13", "PSA.103.12", "MAT.6.14-15", "ISA.1.18", "MIC.7.18-19", "ACT.3.19", "LUK.6.37", "MAT.18.21-22"],
-  },
-  {
-    slug: "fear",
-    name: "Fear",
-    intro: "Courage when you are afraid.",
-    verses: ["ISA.41.10", "2TI.1.7", "PSA.27.1", "JOS.1.9", "PSA.23.4", "1JN.4.18", "DEU.31.8", "PSA.118.6", "ISA.43.1", "MRK.5.36"],
-  },
+  ...CURATED_TOPICS.map((t) => ({ ...t, phrase: t.name.toLowerCase(), source: "curated" as const })),
+  ...(imported as { slug: string; name: string; intro: string; verses: string[] }[])
+    .filter((t) => !CURATED_SLUGS.has(t.slug))
+    .map((t) => ({ slug: t.slug, name: capitalise(t.name), phrase: t.name, intro: t.intro, verses: t.verses, source: "openbible" as const })),
 ];
 
 /** Topics shown on the home page. */
 export const HOME_TOPICS = ["anxiety", "hope", "strength", "grief"];
 
+const BY_SLUG = new Map(TOPICS.map((t) => [t.slug, t]));
+
 export function topicBySlug(slug: string): Topic | undefined {
-  return TOPICS.find((t) => t.slug === slug);
+  return BY_SLUG.get(slug);
 }
 
 export interface TopicVerseRef {
@@ -85,11 +53,71 @@ export function parseTopicVerse(id: string): TopicVerseRef {
   return { code: m[1], chapter: Number(m[2]), start, end };
 }
 
+/** Every single verse a topic lists, ranges expanded: "JHN.3.16". */
+function expand(id: string): string[] {
+  const { code, chapter, start, end } = parseTopicVerse(id);
+  return Array.from({ length: end - start + 1 }, (_, i) => `${code}.${chapter}.${start + i}`);
+}
+
+let verseIndex: Map<string, Topic[]> | null = null;
+
+/** Topics that list this verse (alone or in a range), curated first. */
+export function topicsForVerse(verseId: string): Topic[] {
+  if (!verseIndex) {
+    verseIndex = new Map();
+    for (const t of TOPICS) {
+      for (const v of new Set(t.verses.flatMap(expand))) {
+        if (!verseIndex.has(v)) verseIndex.set(v, []);
+        verseIndex.get(v)!.push(t);
+      }
+    }
+  }
+  return verseIndex.get(verseId) ?? [];
+}
+
 /**
- * The topic page a search is probably looking for: "anxious" → Anxiety,
- * "hopeless" → Hope. Matches on the first four letters of a word.
+ * Topics that share the most verses with this one, for "Related topics". A shared verse
+ * counts for less the more topics list it, so John 3:16 doesn't relate everything.
+ */
+export function relatedTopics(topic: Topic, limit = 8): Topic[] {
+  const counts = new Map<Topic, number>();
+  // Each passage counts once, however many verses it spans.
+  for (const id of topic.verses) {
+    const all = new Set(expand(id).flatMap(topicsForVerse));
+    for (const t of all) if (t !== topic) counts.set(t, (counts.get(t) ?? 0) + 1 / all.size);
+  }
+  return [...counts]
+    .sort((a, b) => b[1] - a[1] || a[0].slug.localeCompare(b[0].slug))
+    .slice(0, limit)
+    .map(([t]) => t);
+}
+
+const words = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.replace(/([^s])s$/, "$1"));
+
+const STOP = new Set(["the", "your", "of", "a", "we", "and"]);
+
+/**
+ * The topic page a search is probably looking for. Curated topics match on the first
+ * four letters of a word ("anxious" → Anxiety, "hopeless" → Hope). Imported topics
+ * need every word of their name in the query ("bible verses about marriage" → Marriage).
  */
 export function topicForQuery(query: string): Topic | undefined {
-  const words = query.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter((w) => w.length >= 4);
-  return TOPICS.find((t) => words.some((w) => t.slug.startsWith(w.slice(0, 4))));
+  const q = words(query);
+  const qs = new Set(q);
+  const matches = TOPICS.filter((t) => t.source === "openbible")
+    .map((t) => ({ t, need: words(t.phrase).filter((w) => !STOP.has(w)) }))
+    .filter(({ need }) => need.length > 0 && need.join("").length >= 4 && need.every((w) => qs.has(w)))
+    .sort((a, b) => b.need.length - a.need.length);
+  // A multi-word topic ("God’s love") is more specific than a curated prefix match ("love").
+  if (matches[0] && matches[0].need.length > 1) return matches[0].t;
+  const long = q.filter((w) => w.length >= 4);
+  const curated = TOPICS.find((t) => t.source === "curated" && long.some((w) => t.slug.startsWith(w.slice(0, 4))));
+  return curated ?? matches[0]?.t;
 }
