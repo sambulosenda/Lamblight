@@ -103,6 +103,23 @@ const words = (s: string) =>
 
 const STOP = new Set(["the", "your", "of", "a", "we", "and"]);
 
+/** "bible verses about", "what does the bible say about", "scriptures for" and the like. */
+const LEAD_IN =
+  /^(?:what\s+(?:does|do|did)\s+(?:the\s+)?(?:bible|scriptures?|god|jesus)\s+(?:say|says|teach|teaches)\s+(?:about|on)|what\s+the\s+bible\s+says\s+about|(?:(?:the\s+)?bible\s+|kjv\s+|short\s+)?(?:verses?|scriptures?|passages?|quotes?)\s+(?:about|on|for|of|to\s+help\s+with)|(?:the\s+)?bible\s+(?:on|about))\s+(.+?)[?.!]*$/i;
+/** "anxiety bible verses", "verses on anxiety" handled above; this is the trailing form. */
+const TRAILER = /^(.+?)\s+(?:bible\s+)?(?:verses?|scriptures?|in\s+the\s+bible)[?.!]*$/i;
+
+/**
+ * The subject of a "verses about X" search, or null when the query isn't phrased that
+ * way (a plain keyword search such as "love" or "do not be anxious").
+ */
+export function topicPhrase(query: string): string | null {
+  const q = query.trim().replace(/\s+/g, " ");
+  const m = q.match(LEAD_IN) ?? q.match(TRAILER);
+  const rest = m?.[1].replace(/^(?:the|a|an|being|having)\s+/i, "").trim();
+  return rest ? rest : null;
+}
+
 /**
  * The topic page a search is probably looking for. Curated topics match on the first
  * four letters of a word ("anxious" → Anxiety, "hopeless" → Hope). Imported topics
