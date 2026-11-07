@@ -113,7 +113,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
             <BookIcon size={22} />
           </span>
           <span className="topic-card__text">
-            <span className="topic-card__name">Verses about {topic.name.toLowerCase()}</span>
+            <span className="topic-card__name">Verses about {topic.phrase}</span>
             <span className="topic-card__intro">{topic.intro}</span>
           </span>
           <span className="topic-card__go" aria-hidden="true">

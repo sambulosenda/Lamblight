@@ -6,7 +6,7 @@ import { getChapter } from "@/lib/bible";
 import { bookByCode, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { versePath } from "@/lib/site";
-import { TOPICS, parseTopicVerse, topicBySlug } from "@/lib/topics";
+import { TOPICS, parseTopicVerse, relatedTopics, topicBySlug } from "@/lib/topics";
 import { DEFAULT_VERSION } from "@/lib/versions";
 
 export function generateStaticParams() {
@@ -22,8 +22,8 @@ async function resolve(params: Promise<{ slug: string }>) {
 export async function generateMetadata({ params }: PageProps<"/topics/[slug]">): Promise<Metadata> {
   const topic = await resolve(params);
   return {
-    title: `Bible verses about ${topic.name.toLowerCase()} (BSB)`,
-    description: `${topic.verses.length} Bible verses about ${topic.name.toLowerCase()}. ${topic.intro} Berean Standard Bible.`,
+    title: `Bible verses about ${topic.phrase} (BSB)`,
+    description: `${topic.verses.length} Bible verses about ${topic.phrase}. ${topic.intro} Berean Standard Bible.`,
     alternates: { canonical: `/topics/${topic.slug}` },
   };
 }
@@ -47,7 +47,9 @@ async function loadVerses(ids: string[]) {
 export default async function TopicPage({ params }: PageProps<"/topics/[slug]">) {
   const topic = await resolve(params);
   const verses = await loadVerses(topic.verses);
-  const others = TOPICS.filter((t) => t.slug !== topic.slug);
+  const related = relatedTopics(topic);
+  // Pad with curated topics so every page links on, even when it shares no verses.
+  const others = [...related, ...TOPICS.filter((t) => t.source === "curated" && t !== topic && !related.includes(t))].slice(0, 8);
   return (
     <main id="content" className="page">
       <JsonLd
@@ -65,7 +67,7 @@ export default async function TopicPage({ params }: PageProps<"/topics/[slug]">)
         </ol>
       </nav>
       <div>
-        <h1 className="index-title">Verses about {topic.name.toLowerCase()}</h1>
+        <h1 className="index-title">Verses about {topic.phrase}</h1>
         <p className="index-sub">{topic.intro}</p>
       </div>
       <ol className="results topic-verses">
@@ -78,10 +80,18 @@ export default async function TopicPage({ params }: PageProps<"/topics/[slug]">)
           </li>
         ))}
       </ol>
-      <p className="copyright">Berean Standard Bible. Public domain.</p>
+      <p className="copyright">
+        Berean Standard Bible. Public domain.
+        {topic.source === "openbible" && (
+          <>
+            {" "}
+            Verses chosen with help from <a href="https://www.openbible.info/topics/">OpenBible.info</a> (CC BY).
+          </>
+        )}
+      </p>
       <section aria-labelledby="more-topics">
         <h2 id="more-topics" className="section-title">
-          More topics
+          Related topics
         </h2>
         <ul className="book-links">
           {others.map((t) => (
