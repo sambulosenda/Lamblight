@@ -58,6 +58,25 @@ script before first paint, so pages stay static with no flash.
 Licensed versions (YouVersion Platform) will load in the browser only and never get
 server-rendered or indexed pages.
 
+## Audio
+
+World English Bible chapters can be played with the Listen button in the reader. The recording
+is by Winfred W. Henson and is in the public domain ([ebible.org](https://ebible.org/eng-web/audio/)).
+The files live in a Cloudflare R2 bucket, not in the repo.
+
+1. Create an R2 bucket (for example `lamplight-audio`) and give it public access, through a custom
+   domain or the `r2.dev` URL.
+2. With ffmpeg installed and `wrangler login` done, run
+   `npm run import:audio -- --bucket lamplight-audio`. It downloads each chapter from ebible.org,
+   re-encodes it to 64 kbps mono (about 2.7 GB in all, 1,189 files), uploads it as
+   `web/<BOOK>/<chapter>.mp3`, and records it in `data/audio/web.json`. If it stops, run it again
+   and it carries on. `--books JHN,PSA` limits it to some books, and `--check` only checks that
+   every book has the right number of files.
+3. Commit `data/audio/web.json` and set `AUDIO_BASE_URL` to the bucket's public URL.
+
+A chapter gets a Listen button only when it is in the manifest and `AUDIO_BASE_URL` is set, so a
+half-finished upload never shows a broken player.
+
 ## Data source note
 
 All committed Bible text comes from ebible.org (see `source` and `importedAt` in each

@@ -5,6 +5,7 @@ import { ChapterText, Footnotes, psalterBook } from "@/components/ChapterText";
 import { ReaderSettings } from "@/components/ReaderSettings";
 import { VerseSelect } from "@/components/VerseSelect";
 import { VersionPicker } from "@/components/VersionPicker";
+import { getAudioTrack } from "@/lib/audio";
 import { getChapter, nextChapter, previousChapter } from "@/lib/bible";
 import { BOOKS, chapterName } from "@/lib/books";
 import { HEADING_BLOCKS } from "@/lib/scripture";
@@ -12,6 +13,7 @@ import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
 import { chapterPath, comparePath, versePath } from "@/lib/site";
 import { ContinueInto } from "@/components/ContinueInto";
+import { ListenButton } from "@/components/ListenButton";
 import { PlanChapterBar } from "@/components/PlanChapterBar";
 import type { Chapter } from "@/lib/scripture";
 import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
@@ -69,6 +71,8 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
   const words = chapter.verses.reduce((n, [, t]) => n + t.split(/\s+/).filter(Boolean).length, 0);
   const minutes = Math.max(1, Math.round(words / 230));
   const teaser = next ? await openingOf(version.id, next.book.code, next.chapter) : null;
+  const audio = await getAudioTrack(version.id, book, chapter.n);
+  const nextAudio = audio && next ? await getAudioTrack(version.id, next.book, next.chapter) : null;
   const studyVerses =
     version.id === DEFAULT_VERSION ? chapter.verses.map(([v]) => v) : ((await getChapter(DEFAULT_VERSION, book.code, chapter.n))?.verses.map(([v]) => v) ?? []);
 
@@ -85,6 +89,7 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
         <ChapterPicker version={version.id} bookCode={book.code} chapter={chapter.n} label={`${chapterName(book)} ${chapter.n}`} />
         <VersionPicker version={version.id} path={`/${book.slug}/${chapter.n}`} previews={previews} />
         <span className="reader-bar__spacer" />
+        {audio ? <ListenButton track={audio} next={nextAudio} /> : null}
         <nav aria-label="Mode" className="reader-modes">
           <Link href={comparePath(book.slug, chapter.n)}>Compare</Link>
           {studyVerses.length ? <Link href={`${versePath(DEFAULT_VERSION, book.slug, chapter.n, studyVerses[0])}/study`}>Study</Link> : null}
