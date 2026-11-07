@@ -12,7 +12,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "import": "tsx scripts/import-bible.ts",
     "count-uses": "tsx scripts/count-uses.ts",
-    "import:topics": "tsx scripts/import-topics.ts"
+    "import:topics": "tsx scripts/import-topics.ts",
+    "import:audio": "tsx scripts/import-audio.ts"
   },
   "dependencies": {
     "next": "16.4.5",

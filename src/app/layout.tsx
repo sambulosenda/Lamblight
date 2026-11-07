@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Literata } from "next/font/google";
+import { MiniPlayer } from "@/components/MiniPlayer";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         {children}
         <SiteFooter />
+        <MiniPlayer />
       </body>
     </html>
   );
