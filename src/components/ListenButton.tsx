@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import type { AudioTrack } from "@/lib/audio-types";
-import { playTrack, setNext, togglePlay, usePlayer } from "@/lib/audio-player";
+import { isActive, playTrack, setNext, togglePlay, usePlayer } from "@/lib/audio-player";
 import { HeadphonesIcon, PauseIcon } from "./Icons";
 
 const minutes = (s: number) => Math.max(1, Math.round(s / 60));
@@ -11,6 +11,7 @@ const minutes = (s: number) => Math.max(1, Math.round(s / 60));
 export function ListenButton({ track, next }: { track: AudioTrack; next: AudioTrack | null }) {
   const player = usePlayer();
   const current = player.track?.key === track.key;
+  const active = current && isActive(player);
 
   // Following along: when the player has moved on to this chapter, tell it what comes after.
   useEffect(() => {
@@ -21,12 +22,12 @@ export function ListenButton({ track, next }: { track: AudioTrack; next: AudioTr
     <button
       type="button"
       className="btn btn--quiet listen-btn"
-      aria-pressed={current && player.playing}
+      aria-pressed={active}
       onClick={() => (current ? togglePlay() : playTrack(track, next))}
       title={`Listen to ${track.title}, about ${minutes(track.duration)} min`}
     >
-      {current && player.playing ? <PauseIcon size={14} /> : <HeadphonesIcon />}
-      <span>{current && player.playing ? "Pause" : "Listen"}</span>
+      {active ? <PauseIcon size={14} /> : <HeadphonesIcon />}
+      <span>{active ? "Pause" : "Listen"}</span>
     </button>
   );
 }

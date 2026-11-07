@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { closePlayer, cycleRate, onTrackEnded, seek, skip, togglePlay, usePlayer } from "@/lib/audio-player";
+import { closePlayer, cycleRate, isActive, onTrackEnded, seek, skip, togglePlay, usePlayer } from "@/lib/audio-player";
 import { CloseIcon, PauseIcon, PlayIcon, SkipIcon } from "./Icons";
 
 const clock = (s: number) => {
@@ -38,14 +38,14 @@ export function MiniPlayer() {
       <div className="mini-player__inner">
         <div className="mini-player__title">
           {onPage ? <span>{p.track.title}</span> : <Link href={p.track.href}>{p.track.title}</Link>}
-          <span className="mini-player__sub">{p.error ? "Could not load the recording." : "World English Bible · read by Winfred W. Henson"}</span>
+          <span className="mini-player__sub">{p.status === "error" ? "Could not load the recording." : "World English Bible · read by Winfred W. Henson"}</span>
         </div>
         <div className="mini-player__controls">
           <button type="button" className="icon-btn" onClick={() => skip(-15)} aria-label="Back 15 seconds">
             <SkipIcon direction="back" />
           </button>
-          <button type="button" className="icon-btn mini-player__play" onClick={togglePlay} aria-label={p.playing ? "Pause" : "Play"}>
-            {p.playing ? <PauseIcon size={20} /> : <PlayIcon size={20} />}
+          <button type="button" className="icon-btn mini-player__play" onClick={togglePlay} aria-label={isActive(p) ? "Pause" : p.status === "error" ? "Try again" : "Play"}>
+            {isActive(p) ? <PauseIcon size={20} /> : <PlayIcon size={20} />}
           </button>
           <button type="button" className="icon-btn" onClick={() => skip(15)} aria-label="Forward 15 seconds">
             <SkipIcon direction="forward" />

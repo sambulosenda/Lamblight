@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CopyIcon, ShareIcon } from "./Icons";
 
 interface Props {
@@ -12,8 +12,21 @@ interface Props {
   short?: boolean;
 }
 
+/** A label that shows for two seconds; showing it again restarts the two seconds. */
+function useFlash(): [boolean, () => void] {
+  const [on, setOn] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const flash = () => {
+    clearTimeout(timer.current);
+    setOn(true);
+    timer.current = setTimeout(() => setOn(false), 2000);
+  };
+  return [on, flash];
+}
+
 export function CopyVerseButton({ text, reference, versionAbbr, className = "btn btn--quiet", short = false }: Props) {
-  const [done, setDone] = useState(false);
+  const [done, flash] = useFlash();
   return (
     <button
       type="button"
@@ -21,8 +34,7 @@ export function CopyVerseButton({ text, reference, versionAbbr, className = "btn
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(`“${text}”\n${reference} ${versionAbbr}`);
-          setDone(true);
-          setTimeout(() => setDone(false), 2000);
+          flash();
         } catch {}
       }}
     >
@@ -33,7 +45,7 @@ export function CopyVerseButton({ text, reference, versionAbbr, className = "btn
 }
 
 export function ShareVerseButton({ text, reference, versionAbbr, path, className = "btn btn--quiet" }: Props & { path: string }) {
-  const [done, setDone] = useState(false);
+  const [done, flash] = useFlash();
   return (
     <button
       type="button"
@@ -45,8 +57,7 @@ export function ShareVerseButton({ text, reference, versionAbbr, path, className
             await navigator.share({ title: `${reference} ${versionAbbr}`, text: `“${text}” ${reference} ${versionAbbr}`, url });
           } else {
             await navigator.clipboard.writeText(url);
-            setDone(true);
-            setTimeout(() => setDone(false), 2000);
+            flash();
           }
         } catch {}
       }}
