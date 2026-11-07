@@ -95,7 +95,7 @@ export function parseUsfm(src: string, fallbackCode?: string): ParseResult {
     if (!chapter) return;
     chapter.verses = [...verseText.entries()]
       .sort((a, b) => a[0] - b[0])
-      .map(([n, t]) => [n, squash(t).trim()] as [number, string]);
+      .map(([n, t]) => [n, squash(dropNoteGaps(t)).trim()] as [number, string]);
     // Trim trailing whitespace in blocks and drop empty ones (keep "b").
     chapter.blocks = chapter.blocks.filter((bl) => {
       trimBlock(bl);
@@ -130,6 +130,11 @@ export function parseUsfm(src: string, fallbackCode?: string): ParseResult {
       chapter.blocks.push(block);
     }
     const prev = block.c[block.c.length - 1];
+    // "Dara \f…\f*—five": drop the space left before a footnote when punctuation follows it.
+    const beforeNote = block.c[block.c.length - 2];
+    if (typeof item === "string" && PUNCT_AFTER_NOTE.test(item) && typeof prev === "object" && "f" in prev && typeof beforeNote === "string") {
+      block.c[block.c.length - 2] = beforeNote.replace(/\s+$/, "");
+    }
     if (typeof item === "string" && typeof prev === "string") block.c[block.c.length - 1] = prev + item;
     else block.c.push(item);
   };
@@ -217,6 +222,7 @@ export function parseUsfm(src: string, fallbackCode?: string): ParseResult {
           const fn: Footnote = { v: verse, ref: squash(note.ref).trim(), text: tidyNote(note.text) };
           chapter.notes.push(fn);
           pushInline({ f: chapter.notes.length - 1 });
+          appendVerse(NOTE_GAP);
         }
         note = null;
       } else if (marker === "nd") {
@@ -304,6 +310,15 @@ function trimBlock(block: Block) {
     if (t) block.c[block.c.length - 1] = t;
     else block.c.pop();
   }
+}
+
+/** Marks where a footnote was removed from a verse's plain text. */
+const NOTE_GAP = "\u0000";
+const PUNCT_AFTER_NOTE = /^[,.;:!?)\]”’—]/;
+
+/** Some sources put a space before a footnote ("Dara \f…\f*—five"); drop it when punctuation follows. */
+function dropNoteGaps(text: string): string {
+  return text.replace(/\s*\u0000(?=[,.;:!?)\]”’—])/g, "").replaceAll(NOTE_GAP, "");
 }
 
 /** Collapse whitespace and drop spaces that ended up before punctuation. */

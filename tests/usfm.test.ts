@@ -54,6 +54,19 @@ describe("parseUsfm", () => {
     expect(book.chapters[0].notes).toEqual([{ v: 1, ref: "23:1", text: "See Revelation 7:17." }]);
     expect(book.chapters[1].notes[0].text).toBe("LORD or God");
   });
+
+  it("drops a space left before a footnote when punctuation follows it", () => {
+    const { book } = parseUsfm(String.raw`\id 1CH
+\c 2
+\p
+\v 6 and Dara \f + \fr 2:6 \ft Or Darda\f*—five in all.
+\v 7 the Euphrates \f + \fr 2:7 \ft Hebrew the River\f* to the sea.`);
+    expect(book.chapters[0].verses).toEqual([
+      [6, "and Dara—five in all."],
+      [7, "the Euphrates to the sea."],
+    ]);
+    expect(book.chapters[0].blocks[0].c).toEqual([{ v: 6 }, "and Dara", { f: 0 }, "—five in all. ", { v: 7 }, "the Euphrates ", { f: 1 }, " to the sea."]);
+  });
 });
 
 describe("parseUsfm word attributes (WEB/KJV files from ebible.org)", () => {

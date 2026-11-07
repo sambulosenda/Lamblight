@@ -60,9 +60,10 @@ server-rendered or indexed pages.
 
 ## Data source note
 
-ebible.org was not reachable from the build environment used to start this project, so the
-committed BSB data was imported from the USFM in
-[usfm-bible/examples.bsb](https://github.com/usfm-bible/examples.bsb) (BSB text as of
-26 Aug 2024). That fork has at least one known error (Genesis 2:4 repeats "God made them.").
-Before launch, re-import from ebible.org: run the **Import Bible text** workflow with `bsb`,
-or `npm run import -- bsb` on a machine that can reach ebible.org.
+All committed Bible text comes from ebible.org (see `source` and `importedAt` in each
+`data/<version>/meta.json`). The BSB was first imported from a fork with errors (Genesis 2:4
+repeated "God made them."; Judges 13:1, Lamentations 2:1 and Psalm 106:42 were missing) and
+was re-imported from ebible.org on 7 Nov 2026.
+
+Study mode data (`data/study/`) comes from berean-build, which follows an earlier BSB
+revision, so its English wording can differ slightly from the reader text in some verses.
