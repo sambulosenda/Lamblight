@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useState } from "react";
 import { withDivineName } from "./DivineName";
 import type { StudyData } from "@/lib/study";
+import { migrateLegacyNotes, updateMark, useMarks } from "@/lib/marks";
 
 type Tab = "words" | "refs" | "versions" | "notes";
 const TABS: { id: Tab; label: string }[] = [
@@ -19,6 +20,8 @@ interface Props {
   verseRef: string;
   verseNumber: number;
   noteKey: string;
+  /** The verse's plain text, kept with a note so My notes can show it. */
+  text: string;
   lang: "grc" | "hbo";
   data: StudyData;
   /** The same verse in the other versions on the site. */
@@ -32,25 +35,15 @@ function defaultWord(data: StudyData): number {
   return by("V-") ?? by("N-") ?? linked[0] ?? -1;
 }
 
-const noop = () => () => {};
-
-function readNote(key: string): string {
-  try {
-    return localStorage.getItem(key) ?? "";
-  } catch {
-    return "";
-  }
-}
-
-export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey, lang, data, versions }: Props) {
+export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey, text, lang, data, versions }: Props) {
   const [word, setWord] = useState(() => defaultWord(data));
   const [tab, setTab] = useState<Tab>("words");
+  const [interlinear, setInterlinear] = useState(false);
   const base = useId();
-  const storageKey = `lamplight:note:${noteKey}`;
-  const stored = useSyncExternalStore(noop, () => readNote(storageKey), () => "");
-  const [draft, setDraft] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
-  const note = draft ?? stored;
+  const marks = useMarks();
+  const note = marks[noteKey]?.note ?? "";
+  const [saved, setSaved] = useState<boolean | null>(null);
+  useEffect(() => migrateLegacyNotes((id) => (id === noteKey ? text : undefined)), [noteKey, text]);
 
   const seg = word >= 0 ? data.verse.e[word] : undefined;
   const orig = seg && seg.length === 2 ? data.verse.o[seg[1]] : undefined;
@@ -67,43 +60,61 @@ export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey
   }
 
   function saveNote(value: string) {
-    setDraft(value);
-    setSaved(false);
-    try {
-      if (value.trim()) localStorage.setItem(storageKey, value);
-      else localStorage.removeItem(storageKey);
-      setSaved(true);
-    } catch {
-      /* storage unavailable: keep the draft in memory */
-    }
+    setSaved(updateMark(noteKey, { text, version: "bsb" }, { note: value }));
   }
 
   return (
     <>
-      <p className="study-verse" id={noteKey}>
+      <div className="study-verse-bar">
+        <button type="button" className="chip" aria-pressed={interlinear} onClick={() => setInterlinear(!interlinear)}>
+          Interlinear
+        </button>
+      </div>
+      <p className={interlinear ? "study-verse study-verse--interlinear" : "study-verse"} id={noteKey}>
         <sup className="vn">{verseNumber}</sup>
         {data.verse.e.map((s, i) => {
           const sep = i > 0 && !/^[,.;:!?’”)\]]/.test(s[0]) ? " " : "";
           if (s.length === 1)
-            return (
+            return interlinear ? (
+              <span key={i} className="il il--plain">
+                <span className="il__en">{withDivineName(s[0], `s${i}`)}</span>
+              </span>
+            ) : (
               <span key={i}>
                 {sep}
                 {withDivineName(s[0], `s${i}`)}
               </span>
             );
           const o = data.verse.o[s[1]];
-          return (
+          const button = (
+            <button
+              type="button"
+              className="study-word"
+              aria-pressed={word === i}
+              aria-label={o ? `${s[0]}: ${o[0]}, ${o[3]}` : s[0]}
+              onClick={() => choose(i)}
+            >
+              {withDivineName(s[0], `w${i}`)}
+            </button>
+          );
+          return interlinear ? (
+            <span key={i} className="il">
+              <span className="il__en">{button}</span>
+              {o ? (
+                <>
+                  <span className="il__orig" aria-hidden="true">
+                    {original(o[0])}
+                  </span>
+                  <span className="il__key" aria-hidden="true">
+                    {o[3]}
+                  </span>
+                </>
+              ) : null}
+            </span>
+          ) : (
             <span key={i}>
               {sep}
-              <button
-                type="button"
-                className="study-word"
-                aria-pressed={word === i}
-                aria-label={o ? `${s[0]}: ${o[0]}, ${o[3]}` : s[0]}
-                onClick={() => choose(i)}
-              >
-                {withDivineName(s[0], `w${i}`)}
-              </button>
+              {button}
             </span>
           );
         })}
@@ -150,6 +161,11 @@ export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey
                     <span className="lex__translit">{orig[1]}</span>
                     <span className="lex__morph">{orig[2]}</span>
                   </p>
+                  {data.uses[orig[3]] ? (
+                    <p className="lex__uses">
+                      Used in {data.uses[orig[3]] === 1 ? "only this verse" : `${data.uses[orig[3]].toLocaleString("en-GB")} verses`} of the {hebrew ? "Old" : "New"} Testament
+                    </p>
+                  ) : null}
                   {data.lexicon[orig[3]] ? <p className="lex__def">{data.lexicon[orig[3]]}</p> : null}
                 </div>
               ) : (
@@ -224,7 +240,7 @@ export function StudyPanel({ reference, bookName, verseRef, verseNumber, noteKey
                 placeholder="What stands out to you?"
               />
               <p className="study-credit" aria-live="polite">
-                {saved ? "Saved on this device." : "Notes stay on this device."}
+                {saved === false ? "This browser isn’t letting Lamplight save notes." : saved ? "Saved on this device. It’s in My notes too." : "Notes stay on this device, in My notes."}
               </p>
             </div>
           ) : null}

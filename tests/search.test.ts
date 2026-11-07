@@ -21,3 +21,14 @@ describe("searchVerses (BSB)", () => {
     expect(ref(hits[0])).toBe("PSA.119.105");
   });
 });
+
+describe("search filters and spread", () => {
+  it("counts matches in each testament and filters by one", async () => {
+    const all = await searchVerses("bsb", "anxious");
+    expect(all.spread.OT + all.spread.NT).toBe(all.total);
+    const nt = await searchVerses("bsb", "anxious", 50, "NT");
+    expect(nt.total).toBe(all.spread.NT);
+    expect(nt.hits.every((h) => h.book.testament === "NT")).toBe(true);
+    expect(nt.spread).toEqual(all.spread);
+  });
+});

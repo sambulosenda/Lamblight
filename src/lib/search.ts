@@ -69,22 +69,50 @@ function score(row: Row, q: string, words: string[]): number {
   return total;
 }
 
-export async function searchVerses(version: string, query: string, limit = 50): Promise<{ total: number; hits: SearchHit[] }> {
+/** Where the matches fall: per testament, and the book with the most in each. */
+export interface SearchSpread {
+  OT: number;
+  NT: number;
+  topOT: { book: Book; count: number } | null;
+  topNT: { book: Book; count: number } | null;
+}
+
+export interface SearchResult {
+  /** Matches after the testament filter. */
+  total: number;
+  hits: SearchHit[];
+  /** Matches across the whole Bible, whatever the filter. */
+  spread: SearchSpread;
+}
+
+const EMPTY_SPREAD: SearchSpread = { OT: 0, NT: 0, topOT: null, topNT: null };
+
+export async function searchVerses(version: string, query: string, limit = 50, testament?: "OT" | "NT"): Promise<SearchResult> {
   const q = normalise(query);
   const words = q.trim().split(" ").filter(Boolean);
-  if (!words.length) return { total: 0, hits: [] };
+  if (!words.length) return { total: 0, hits: [], spread: EMPTY_SPREAD };
   if (!indexes.has(version)) indexes.set(version, buildIndex(version));
   const rows = await indexes.get(version)!;
 
   const scored: { row: Row; s: number; i: number }[] = [];
+  const spread: SearchSpread = { OT: 0, NT: 0, topOT: null, topNT: null };
+  const perBook = new Map<Book, number>();
   rows.forEach((row, i) => {
     const s = score(row, q, words);
-    if (s > 0) scored.push({ row, s, i });
+    if (s <= 0) return;
+    spread[row.book.testament]++;
+    perBook.set(row.book, (perBook.get(row.book) ?? 0) + 1);
+    if (!testament || row.book.testament === testament) scored.push({ row, s, i });
   });
+  for (const [book, count] of perBook) {
+    const key = book.testament === "OT" ? "topOT" : "topNT";
+    if (!spread[key] || count > spread[key]!.count) spread[key] = { book, count };
+  }
   // Highest score first; ties keep Bible order.
   scored.sort((a, b) => b.s - a.s || a.i - b.i);
   return {
     total: scored.length,
     hits: scored.slice(0, limit).map(({ row: { book, chapter, verse, text } }) => ({ book, chapter, verse, text })),
+    spread,
   };
 }

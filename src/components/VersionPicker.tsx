@@ -8,7 +8,7 @@ import { useDialog } from "./useDialog";
  * Version switcher. Self-hosted versions link to the same chapter in that version.
  * YouVersion Platform versions will be added here once the app key is approved.
  */
-export function VersionPicker({ version, path }: { version: string; path: string }) {
+export function VersionPicker({ version, path, previews = {} }: { version: string; path: string; /** How John 3:16 reads in each version. */ previews?: Record<string, string> }) {
   const { ref: dialogRef, open: openDialog, close: closeDialog, onClick: onDialogClick } = useDialog();
   const current = VERSIONS.find((v) => v.id === version);
   return (
@@ -24,6 +24,7 @@ export function VersionPicker({ version, path }: { version: string; path: string
           </button>
         </div>
         <div className="popover__body">
+          {Object.keys(previews).length ? <p className="option-hint">How John 3:16 reads in each</p> : null}
           <ul className="option-list">
             {VERSIONS.map((v) =>
               v.available ? (
@@ -42,6 +43,11 @@ export function VersionPicker({ version, path }: { version: string; path: string
                     <span className="option__abbr">{v.abbreviation}</span>
                     <span>{v.name}</span>
                     <span className="option__note">{v.id === version ? "Reading" : ""}</span>
+                    {previews[v.id] ? (
+                      <span className="option__preview">
+                        <span className="sr-only">John 3:16 reads: </span>“{previews[v.id]}”
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               ) : (

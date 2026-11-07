@@ -3,6 +3,8 @@ import Link from "next/link";
 import { DEFAULT_VERSION } from "@/lib/versions";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { VerseImageMaker } from "./VerseImageMaker";
+import { NoteSheet } from "./NoteSheet";
+import { COLOURS, COLOUR_LABEL, updateMark, useColourNames, useMarks, type Colour } from "@/lib/marks";
 
 interface Props {
   children: ReactNode;
@@ -11,6 +13,10 @@ interface Props {
   bookName: string;
   chapter: number;
   versionAbbr: string;
+  /** Version id, e.g. "bsb". */
+  versionId: string;
+  /** Book code, e.g. "JHN", for canonical verse IDs. */
+  bookCode: string;
   /** Chapter URL path, e.g. /bsb/john/3 */
   chapterHref: string;
   /** Verses that have a Study page (Study follows the BSB's verse numbering). */
@@ -37,11 +43,30 @@ export function compressRanges(nums: number[]): string {
  * Tap or click verses to select them, then copy or share with the reference and
  * version. Verses are focusable; Enter or Space toggles one, Escape clears.
  */
-export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, chapterHref, studyVerses }: Props) {
+export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, versionId, bookCode, chapterHref, studyVerses }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<number[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [noteFor, setNoteFor] = useState<number | null>(null);
+  const marks = useMarks();
+  const names = useColourNames();
   const texts = new Map(verses);
+  const idFor = (v: number) => `${bookCode}.${chapter}.${v}`;
+
+  // Show this device's highlights, and a dot after verses that have a note.
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const lastRun = new Map<string, HTMLElement>();
+    el.querySelectorAll<HTMLElement>(".verse").forEach((span) => {
+      const mark = marks[`${bookCode}.${chapter}.${span.dataset.v}`];
+      if (mark?.colour) span.dataset.hl = mark.colour;
+      else delete span.dataset.hl;
+      delete span.dataset.note;
+      if (mark?.note?.trim()) lastRun.set(span.dataset.v!, span);
+    });
+    lastRun.forEach((span) => (span.dataset.note = ""));
+  }, [marks, bookCode, chapter]);
 
   // Reflect selection in the DOM (aria-selected on every run of a verse).
   useEffect(() => {
@@ -123,27 +148,72 @@ export function VerseSelect({ children, verses, bookName, chapter, versionAbbr, 
     }
   };
 
+  const highlight = (c: Colour) => {
+    // Tapping the colour every selected verse already has takes it off again.
+    const off = selected.every((v) => marks[idFor(v)]?.colour === c);
+    const ok = selected.every((v) => updateMark(idFor(v), { text: texts.get(v) ?? "", version: versionId }, { colour: off ? undefined : c }));
+    setToast(ok ? (off ? `Highlight removed from ${reference}` : `${reference} · ${names[c]}`) : "This browser isn’t letting Lamplight save highlights.");
+    setSelected([]);
+  };
+
+  const noteVerse = noteFor ?? 0;
+
   return (
     <>
+      {noteFor !== null ? (
+        <NoteSheet
+          id={idFor(noteVerse)}
+          reference={`${bookName} ${chapter}:${noteVerse}`}
+          text={texts.get(noteVerse) ?? ""}
+          version={versionId}
+          open
+          onClose={() => {
+            setNoteFor(null);
+            setSelected([]);
+          }}
+        />
+      ) : null}
       <div ref={root} className="scripture" onClick={onClick} onKeyDown={onKeyDown}>
         {children}
       </div>
       {selected.length > 0 ? (
         <div role="toolbar" aria-label={`Actions for ${reference}`} className="verse-toolbar">
           <span className="verse-toolbar__label">{reference}</span>
-          <span className="verse-toolbar__divider" aria-hidden="true" />
-          <button type="button" onClick={copy}>
-            Copy
-          </button>
-          <button type="button" onClick={share}>
-            Share
-          </button>
-          {single ? <VerseImageMaker path={`${chapterHref}/${single}`} reference={reference} label="Image" className="" /> : null}
-          {single && studyVerses.includes(single) ? <Link href={`/${DEFAULT_VERSION}${chapterHref.slice(chapterHref.indexOf("/", 1))}/${single}/study`}>Study</Link> : null}
-          {single ? <Link href={`${chapterHref}/${single}`}>Open</Link> : null}
-          <button type="button" aria-label="Clear selection" onClick={() => setSelected([])}>
+          <span className="verse-toolbar__swatches">
+            {COLOURS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className="swatch swatch--bar"
+                data-colour={c}
+                aria-pressed={selected.every((v) => marks[idFor(v)]?.colour === c)}
+                aria-label={`Highlight ${COLOUR_LABEL[c].toLowerCase()}, ${names[c]}`}
+                title={names[c]}
+                onClick={() => highlight(c)}
+              >
+                <span />
+              </button>
+            ))}
+          </span>
+          <button type="button" className="verse-toolbar__close" aria-label="Clear selection" onClick={() => setSelected([])}>
             ✕
           </button>
+          <span className="verse-toolbar__actions">
+            {single ? (
+              <button type="button" onClick={() => setNoteFor(single)}>
+                Note
+              </button>
+            ) : null}
+            <button type="button" onClick={copy}>
+              Copy
+            </button>
+            <button type="button" onClick={share}>
+              Share
+            </button>
+            {single && studyVerses.includes(single) ? <Link href={`/${DEFAULT_VERSION}${chapterHref.slice(chapterHref.indexOf("/", 1))}/${single}/study`}>Study</Link> : null}
+            {single ? <VerseImageMaker path={`${chapterHref}/${single}`} reference={reference} label="Image" className="" /> : null}
+            {single ? <Link href={`${chapterHref}/${single}`}>Open</Link> : null}
+          </span>
         </div>
       ) : null}
       {toast ? (
