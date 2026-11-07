@@ -12,6 +12,7 @@ import { breadcrumbs, JsonLd } from "@/lib/jsonld";
 import { resolveChapter } from "@/lib/params";
 import { chapterPath, comparePath, versePath } from "@/lib/site";
 import { ContinueInto } from "@/components/ContinueInto";
+import { PlanChapterBar } from "@/components/PlanChapterBar";
 import type { Chapter } from "@/lib/scripture";
 import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
@@ -123,6 +124,7 @@ export default async function ChapterPage({ params }: PageProps<"/[version]/[boo
           {meta.name} ({meta.abbreviation}). {meta.copyright}
         </p>
         <Footnotes chapter={chapter} />
+        <PlanChapterBar chapterKey={`${book.code}.${chapter.n}`} version={version.id} />
         <div className="fleuron" aria-hidden="true">
           · · ·
         </div>

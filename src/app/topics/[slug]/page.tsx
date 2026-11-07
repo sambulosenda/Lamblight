@@ -9,6 +9,9 @@ import { versePath } from "@/lib/site";
 import { TOPICS, parseTopicVerse, relatedTopics, topicBySlug } from "@/lib/topics";
 import { DEFAULT_VERSION } from "@/lib/versions";
 
+/** Every topic is known at build time; nothing here depends on the request. */
+export const ensureStatic = "navigation";
+
 export function generateStaticParams() {
   return TOPICS.map((t) => ({ slug: t.slug }));
 }

@@ -56,6 +56,8 @@ export function MainNav() {
         ? "notes"
         : pathname.startsWith("/topics")
           ? "topics"
+          : pathname.startsWith("/plans")
+            ? "plans"
           : here
             ? "read"
             : VERSION_IDS.has(pathname.split("/")[1] ?? "")
@@ -68,13 +70,14 @@ export function MainNav() {
     { id: "compare", label: "Compare", href: `/compare/${p.book}/${p.chapter}` },
     { id: "books", label: "Books", href: `/${DEFAULT_VERSION}` },
     { id: "topics", label: "Topics", href: "/topics" },
+    { id: "plans", label: "Plans", href: "/plans" },
     { id: "notes", label: "My notes", href: "/notes" },
   ];
 
   return (
     <nav aria-label="Main" className="main-nav">
       {items.map((it) => (
-        <Link key={it.id} href={it.href} aria-current={mode === it.id ? "page" : undefined} prefetch={it.id === "books" || it.id === "topics" ? undefined : false}>
+        <Link key={it.id} href={it.href} aria-current={mode === it.id ? "page" : undefined} prefetch={it.id === "books" || it.id === "topics" || it.id === "plans" ? undefined : false}>
           {it.label}
         </Link>
       ))}
