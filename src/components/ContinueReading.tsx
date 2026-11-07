@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
+import { activePlans, usePlanProgress } from "@/lib/plan-progress";
+import { chapterLabel, dayLabel, parseChapterKey } from "@/lib/plans";
+import { chapterPath } from "@/lib/site";
+import { DEFAULT_VERSION } from "@/lib/versions";
 
 interface LastRead {
   href: string;
@@ -36,7 +40,8 @@ function parse(raw: string | null): LastRead | null {
 /**
  * "Continue reading", from the chapter the reader last opened on this device,
  * set like the top of a printed page: running head, then the chapter numeral.
- * First-time visitors get a starting point instead.
+ * A reader with a plan in progress gets today's reading instead; first-time
+ * visitors get a starting point.
  */
 const noop = () => () => {};
 
@@ -45,7 +50,31 @@ export function ContinueReading({ fallback }: { fallback: LastRead }) {
   // The saved chapter only exists in the browser. Until it can be read, show an
   // empty card of the same size rather than flashing the first-visit text.
   const hydrated = useSyncExternalStore(noop, () => true, () => false);
+  const plans = usePlanProgress();
   if (!hydrated) return <div className="continue continue--pending" aria-hidden="true" />;
+  const plan = activePlans(plans).find((s) => !s.finished);
+  if (plan) {
+    const day = plan.plan.days[plan.day];
+    const nextKey = day.find((k) => !plan.progress.done.includes(k))!;
+    const p = parseChapterKey(nextKey)!;
+    return (
+      <Link href={chapterPath(DEFAULT_VERSION, p.book.slug, p.chapter)} className="continue">
+        <span className="continue__head">
+          <span className="smallcaps">{plan.plan.name}</span>
+          <span>
+            Day {plan.day + 1} of {plan.plan.days.length}
+          </span>
+        </span>
+        <span className="continue__body">
+          <span className="continue__num" aria-hidden="true">
+            {plan.day + 1}
+          </span>
+          <span className="continue__text">Today: {dayLabel(day).join(", ")}.</span>
+        </span>
+        <span className="continue__cta">Read {chapterLabel(nextKey)} →</span>
+      </Link>
+    );
+  }
   const last = parse(raw);
   const target = last ?? fallback;
   const m = target.label.match(/^(.*?)\s+(\d+)$/);
