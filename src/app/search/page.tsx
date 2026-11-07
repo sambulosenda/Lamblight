@@ -5,7 +5,7 @@ import { SearchIcon } from "@/components/Icons";
 import { chapterName } from "@/lib/books";
 import { Suspense } from "react";
 import { normalise, searchVerses, type SearchSpread } from "@/lib/search";
-import { topicForQuery } from "@/lib/topics";
+import { topicForQuery, topicPhrase } from "@/lib/topics";
 import { BookIcon } from "@/components/Icons";
 import { versePath } from "@/lib/site";
 import { DEFAULT_VERSION } from "@/lib/versions";
@@ -100,8 +100,10 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
         <p>Type a reference like “John 3:16” or words like “do not be anxious”.</p>
       </>
     );
-  const { total, hits, spread } = await searchVerses(DEFAULT_VERSION, q, 50, filter === "all" ? undefined : filter);
-  const topic = topicForQuery(q);
+  // "bible verses about forgiving" searches the verses for "forgiving".
+  const words = topicPhrase(q) ?? q;
+  const { total, hits, spread } = await searchVerses(DEFAULT_VERSION, words, 50, filter === "all" ? undefined : filter);
+  const topic = topicForQuery(words);
   const everywhere = spread.OT + spread.NT;
   return (
     <>
@@ -122,7 +124,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
         </Link>
       ) : null}
       <h1 className="index-title" style={{ fontSize: 28 }}>
-        {total ? `${total.toLocaleString("en-GB")} ${total === 1 ? "verse" : "verses"}` : "No verses found"} for “{q}”
+        {total ? `${total.toLocaleString("en-GB")} ${total === 1 ? "verse" : "verses"}` : "No verses found"} for “{words}”
         {filter !== "all" ? <span className="index-title__in"> in the {filter === "OT" ? "Old" : "New"} Testament</span> : null}
       </h1>
       <Spread spread={spread} />
@@ -144,7 +146,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
               <span className="ref">
                 {chapterName(h.book)} {h.chapter}:{h.verse}
               </span>
-              <span className="text">{highlight(h.text, q)}</span>
+              <span className="text">{highlight(h.text, words)}</span>
             </Link>
           </li>
         ))}

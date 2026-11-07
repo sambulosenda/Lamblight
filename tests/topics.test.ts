@@ -71,3 +71,32 @@ describe("topicForQuery", () => {
     expect(topicForQuery("verses for husbands")?.slug).toBe("husbands");
   });
 });
+
+describe("topicPhrase", () => {
+  it("pulls the subject out of a 'verses about' search", async () => {
+    const { topicPhrase } = await import("../src/lib/topics");
+    expect(topicPhrase("bible verses about anxiety")).toBe("anxiety");
+    expect(topicPhrase("Bible verse about God’s love")).toBe("God’s love");
+    expect(topicPhrase("what does the bible say about forgiveness?")).toBe("forgiveness");
+    expect(topicPhrase("What the Bible says about marriage")).toBe("marriage");
+    expect(topicPhrase("scriptures for healing")).toBe("healing");
+    expect(topicPhrase("verses on being thankful")).toBe("thankful");
+    expect(topicPhrase("short verses about hope")).toBe("hope");
+    expect(topicPhrase("anxiety bible verses")).toBe("anxiety");
+    expect(topicPhrase("grief in the bible")).toBe("grief");
+  });
+  it("leaves plain searches alone", async () => {
+    const { topicPhrase } = await import("../src/lib/topics");
+    expect(topicPhrase("love")).toBeNull();
+    expect(topicPhrase("do not be anxious")).toBeNull();
+    expect(topicPhrase("jesus wept")).toBeNull();
+    expect(topicPhrase("verses")).toBeNull();
+  });
+  it("finds a topic for the subject", async () => {
+    const { topicForQuery, topicPhrase } = await import("../src/lib/topics");
+    const find = (q: string) => topicForQuery(topicPhrase(q)!)?.slug;
+    expect(find("bible verses about anxiety")).toBe("anxiety");
+    expect(find("what does the bible say about God's love")).toBe("gods-love");
+    expect(find("verses for husbands")).toBe("husbands");
+  });
+});
