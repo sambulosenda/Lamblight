@@ -26,7 +26,10 @@ export function PlanSchedule({ slug }: { slug: string }) {
   const done = new Set(progress?.done ?? []);
   const today = status && !status.finished ? plan.days[status.day] : null;
   const nextChapter = today?.find((k) => !done.has(k));
-  const [confirmStop, setConfirmStop] = useState(false);
+  // The confirm step belongs to one run of the plan (its start time), so it can't
+  // outlive a stop made in another tab and reappear when the plan is started again.
+  const [confirmFor, setConfirmFor] = useState<number | null>(null);
+  const confirmStop = progress !== undefined && confirmFor === progress.started;
 
   return (
     <>
@@ -63,17 +66,17 @@ export function PlanSchedule({ slug }: { slug: string }) {
                     className="btn"
                     onClick={() => {
                       stopPlan(slug);
-                      setConfirmStop(false);
+                      setConfirmFor(null);
                     }}
                   >
                     Yes, stop and clear progress
                   </button>
-                  <button type="button" className="btn btn--quiet" onClick={() => setConfirmStop(false)}>
+                  <button type="button" className="btn btn--quiet" onClick={() => setConfirmFor(null)}>
                     Cancel
                   </button>
                 </>
               ) : (
-                <button type="button" className="btn btn--quiet" onClick={() => setConfirmStop(true)}>
+                <button type="button" className="btn btn--quiet" onClick={() => setConfirmFor(progress!.started)}>
                   Stop plan
                 </button>
               )}
