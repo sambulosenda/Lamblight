@@ -40,7 +40,6 @@ async function VerseOfTheDay() {
         <CopyVerseButton text={text} reference={ref} versionAbbr="BSB" />
         <ShareVerseButton text={text} reference={ref} versionAbbr="BSB" path={versePath(DEFAULT_VERSION, book.slug, chapter, verse)} />
       </div>
-      <SubscribeForm compact />
     </section>
   );
 }
@@ -73,6 +72,10 @@ export default function Home() {
       <div className="home-top">
         <VerseOfTheDay />
         <ContinueReading fallback={{ href: chapterPath(DEFAULT_VERSION, "john", 1), label: "John 1" }} />
+        {/* After the reading card on phones, so reading comes before the sign-up. */}
+        <div className="home-signup">
+          <SubscribeForm compact />
+        </div>
       </div>
       <div className="home-index">
         <section aria-labelledby="ot">

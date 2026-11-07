@@ -25,3 +25,14 @@ describe("topics", () => {
     for (const slug of HOME_TOPICS) expect(topicBySlug(slug)).toBeDefined();
   });
 });
+
+describe("topicForQuery", () => {
+  it("finds the topic a search is about", async () => {
+    const { topicForQuery } = await import("../src/lib/topics");
+    expect(topicForQuery("anxious")?.slug).toBe("anxiety");
+    expect(topicForQuery("do not be anxious")?.slug).toBe("anxiety");
+    expect(topicForQuery("hopeless")?.slug).toBe("hope");
+    expect(topicForQuery("loved")?.slug).toBe("love");
+    expect(topicForQuery("jesus wept")).toBeUndefined();
+  });
+});

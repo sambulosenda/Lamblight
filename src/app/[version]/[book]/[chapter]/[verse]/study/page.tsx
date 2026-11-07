@@ -7,7 +7,7 @@ import { StudyPanel } from "@/components/StudyPanel";
 import { getChapter } from "@/lib/bible";
 import { chapterName } from "@/lib/books";
 import { resolveChapter } from "@/lib/params";
-import { chapterPath, versePath } from "@/lib/site";
+import { chapterPath, comparePath, versePath } from "@/lib/site";
 import { getStudy } from "@/lib/study";
 import { AVAILABLE_VERSIONS, DEFAULT_VERSION } from "@/lib/versions";
 
@@ -61,6 +61,7 @@ export default async function StudyPage({ params }: PageProps<"/[version]/[book]
     <main id="content" className={`study ${greek.variable} ${hebrew.variable}`}>
       <nav aria-label="Mode" className="study-modes">
         <Link href={`${chapterPath(version.id, book.slug, chapter.n)}#${book.code}.${chapter.n}.${n}`}>Read</Link>
+        <Link href={comparePath(book.slug, chapter.n)}>Compare</Link>
         <span aria-current="page">Study</span>
       </nav>
       <div className="study-grid">
@@ -88,6 +89,7 @@ export default async function StudyPage({ params }: PageProps<"/[version]/[book]
             verseRef={`${chapter.n}:${n}`}
             verseNumber={n}
             noteKey={`${book.code}.${chapter.n}.${n}`}
+            text={chapter.verses[index][1]}
             lang={lang}
             data={study}
             versions={versions}

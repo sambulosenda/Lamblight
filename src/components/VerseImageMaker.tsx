@@ -15,7 +15,7 @@ const SHAPES = [
 ];
 
 /** "Verse image" dialog: pick a style and shape, then save or share the PNG made by /img/... */
-export function VerseImageMaker({ path, reference, label = "Verse image", className = "btn btn--quiet" }: { path: string; reference: string; label?: string; className?: string }) {
+export function VerseImageMaker({ path, reference, label = "Verse image", className = "btn btn--quiet" }: { path: string; reference: string; label?: React.ReactNode; className?: string }) {
   const { ref: dialogRef, open, close, onClick } = useDialog();
   const [style, setStyle] = useState("paper");
   const [shape, setShape] = useState("post");

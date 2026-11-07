@@ -10,7 +10,8 @@
     "import:study": "tsx scripts/import-study.ts",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
-    "import": "tsx scripts/import-bible.ts"
+    "import": "tsx scripts/import-bible.ts",
+    "count-uses": "tsx scripts/count-uses.ts"
   },
   "dependencies": {
     "next": "16.4.5",

@@ -7,6 +7,8 @@ type Theme = "light" | "dark" | "system";
 interface Prefs {
   theme?: Theme;
   size?: number;
+  /** Scrolling past the end of a chapter opens the next one. On unless turned off. */
+  continuous?: boolean;
 }
 
 const KEY = "lamplight:prefs";
@@ -89,6 +91,17 @@ export function ReaderSettings() {
                   {t === "light" ? "Light" : t === "dark" ? "Dark" : "Match device"}
                 </button>
               ))}
+            </div>
+          </div>
+          <div className="setting">
+            <h3>At the end of a chapter</h3>
+            <div className="segmented" role="group" aria-label="At the end of a chapter">
+              <button type="button" aria-pressed={prefs.continuous !== false} onClick={() => update({ ...prefs, continuous: true })}>
+                Keep scrolling into the next
+              </button>
+              <button type="button" aria-pressed={prefs.continuous === false} onClick={() => update({ ...prefs, continuous: false })}>
+                Stop and show links
+              </button>
             </div>
           </div>
         </div>

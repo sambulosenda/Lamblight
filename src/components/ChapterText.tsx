@@ -130,7 +130,7 @@ export function ChapterText({ chapter, bookCode }: { chapter: Chapter; bookCode:
     return (
       <>
         <div className="psalm-head" aria-hidden="true">
-          <span className="psalm-head__word">Psalm</span>
+          <span className="psalm-head__word">Psalms · {psalterBook(chapter.n)}</span>
           <span className="psalm-head__num">{chapter.n}</span>
           <span className="psalm-head__orn">
             <span />

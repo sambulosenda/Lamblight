@@ -30,6 +30,17 @@ async function readLexicon(): Promise<Record<string, string>> {
   }
 }
 
+/** Strong's number → how many verses use it, from scripts/count-uses.ts. */
+async function readUses(): Promise<Record<string, number>> {
+  "use cache";
+  cacheLife("max");
+  try {
+    return JSON.parse(await readFile(path.join(DIR, "uses.json"), "utf8"));
+  } catch {
+    return {};
+  }
+}
+
 export interface StudyCrossRef {
   id: string;
   ref: string;
@@ -41,6 +52,8 @@ export interface StudyData {
   verse: StudyVerse;
   /** Strong's definitions for the words in this verse. */
   lexicon: Record<string, string>;
+  /** How many verses in the Bible use each Strong's number in this verse. */
+  uses: Record<string, number>;
   crossRefs: StudyCrossRef[];
 }
 
@@ -68,11 +81,15 @@ async function crossRef(id: string, version: string): Promise<StudyCrossRef | nu
 export async function getStudy(version: string, code: string, chapter: number, verse: number): Promise<StudyData | null> {
   "use cache";
   cacheLife("max");
-  const [book, lexAll] = await Promise.all([readBook(code), readLexicon()]);
+  const [book, lexAll, usesAll] = await Promise.all([readBook(code), readLexicon(), readUses()]);
   const v = book?.chapters[String(chapter)]?.[String(verse)];
   if (!v) return null;
   const lexicon: Record<string, string> = {};
-  for (const [, , , key] of v.o) if (lexAll[key]) lexicon[key] = lexAll[key];
+  const uses: Record<string, number> = {};
+  for (const [, , , key] of v.o) {
+    if (lexAll[key]) lexicon[key] = lexAll[key];
+    if (usesAll[key]) uses[key] = usesAll[key];
+  }
   const crossRefs = (await Promise.all(v.x.map((id) => crossRef(id, version)))).filter((x) => x !== null);
-  return { verse: v, lexicon, crossRefs };
+  return { verse: v, lexicon, uses, crossRefs };
 }

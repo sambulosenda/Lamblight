@@ -84,3 +84,12 @@ export function parseTopicVerse(id: string): TopicVerseRef {
   if (end < start) throw new Error(`Bad topic verse id ${id}: range ends before it starts`);
   return { code: m[1], chapter: Number(m[2]), start, end };
 }
+
+/**
+ * The topic page a search is probably looking for: "anxious" → Anxiety,
+ * "hopeless" → Hope. Matches on the first four letters of a word.
+ */
+export function topicForQuery(query: string): Topic | undefined {
+  const words = query.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter((w) => w.length >= 4);
+  return TOPICS.find((t) => words.some((w) => t.slug.startsWith(w.slice(0, 4))));
+}

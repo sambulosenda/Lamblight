@@ -4,6 +4,7 @@ import { withDivineName } from "@/components/DivineName";
 import { notFound } from "next/navigation";
 import { CopyVerseButton, ShareVerseButton } from "@/components/VerseActions";
 import { VerseImageMaker } from "@/components/VerseImageMaker";
+import { BookIcon, ImageIcon, StudyIcon } from "@/components/Icons";
 import { getChapter, getVerseNumbers, nextChapter, previousChapter } from "@/lib/bible";
 import { BOOKS, chapterName } from "@/lib/books";
 import { breadcrumbs, JsonLd } from "@/lib/jsonld";
@@ -138,18 +139,33 @@ export default async function VersePage({ params }: PageProps<"/[version]/[book]
         <p className="attribution">
           {meta.name} ({meta.abbreviation}). Public domain.
         </p>
-        <div className="actions">
+        <div className="actions verse-actions">
           <Link href={`${chapterHref}#${book.code}.${chapter.n}.${n}`} className="btn btn--primary">
-            Read {chapterName(book)} {chapter.n}
+            <BookIcon />
+            <span className="wide-only">
+              Read {chapterName(book)} {chapter.n}
+            </span>
+            <span className="narrow-only">Chapter</span>
           </Link>
           {hasStudy ? (
             <Link href={`${versePath(DEFAULT_VERSION, book.slug, chapter.n, n)}/study`} className="btn">
-              Study the words
+              <StudyIcon />
+              <span className="wide-only">Study the words</span>
+              <span className="narrow-only">Study</span>
             </Link>
           ) : null}
-          <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} />
+          <CopyVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} className="btn btn--quiet" short />
           <ShareVerseButton text={text} reference={ref} versionAbbr={version.abbreviation} path={path} />
-          <VerseImageMaker path={path} reference={ref} />
+          <VerseImageMaker
+            path={path}
+            reference={ref}
+            label={
+              <>
+                <ImageIcon />
+                <span>Image</span>
+              </>
+            }
+          />
         </div>
       </section>
 

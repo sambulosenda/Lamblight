@@ -7,3 +7,4 @@ export const SITE_DESCRIPTION =
 export const chapterPath = (version: string, bookSlug: string, chapter: number) => `/${version}/${bookSlug}/${chapter}`;
 export const versePath = (version: string, bookSlug: string, chapter: number, verse: number) =>
   `/${version}/${bookSlug}/${chapter}/${verse}`;
+export const comparePath = (bookSlug: string, chapter: number) => `/compare/${bookSlug}/${chapter}`;
